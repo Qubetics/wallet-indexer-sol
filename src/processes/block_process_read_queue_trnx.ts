@@ -1,0 +1,351 @@
+import { config } from "../config/config";
+import kafkaHelper from "../config/kafka.helper";
+import { Solana_Helper, Utility_Helper } from "../helpers";
+import { TxType } from "../types/ERC20Tokens.types";
+import { TrnxTypeEnum } from "../enum";
+import { global_helper } from "../helpers/global_helper";
+import solProcessHelper from "./process.helper";
+
+class queue_transactions {
+    public swapProgramIds: any;
+
+    public sol_block_tx_topic = config.KAFKA_BLOCKS.SOL_BLOCK_TX_TOPIC;
+    public sol_block_tx_group_id = config.KAFKA_BLOCKS.SOL_BLOCK_TX_GROUP_ID;
+    public deposit_withdraw_topic = config.KAFKA_TRANSACTIONS.DEPOSIT_WITHDRAW_TOPIC;
+
+    constructor() {
+        // Jupiter Aggregator v6 -> JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4
+        // Jupiter Aggregator v4 -> JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB
+        // Raydium Concentrated Liquidity -> CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK
+        // Raydium CPMM -> CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C
+        // Raydium liquidity pool AMM -> 5quBtoiQqxF9Jv6KYKctB59NT3gtJD2Y65kdnB1Uev3h
+        // Raydium Liquidity Pool V4 -> 675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8
+        // Raydium Liquidity Pool V3 -> 27haf8L6oxUeXrHrgEgsexjSY5hbVUWEmvv9Nyxg8vQv
+        // Raydium Liquidity Pool V2 -> RVKd61ztZW9GUwhRbbLoYVRE5Xf1B2tVscKqwZqXgEr
+        // Raydium AMM Routing -> routeUGWgWzqBWFcrCfv8tritsqukccJPu3q5GPP3xS
+        // Orca -> whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc
+        // Orca Token Swap V2 -> REDACTED
+        // Orca Token Swap -> REDACTED
+        // Meteora DLMM Program -> LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo
+        // Meteora Pools Program -> Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB
+        // Phoenix -> PhoeNiXZ8ByJGLkxNfZRnkUfjvmuYqLR89jjFHGqdXY
+        // Lifinity Swap V2 -> 2wT8Yq49kHgDzXuPxZSaeLaH1qbmGXtEyPy64bL7aD3c
+        // Lifinity Swap -> EewxydAPCCVuNEyrVN68PuSYdQ7wKn27V9Gjeoi8dy3S
+        // Saber Stable Swap -> SSwpkEEcbUqx4vtoEByFjSkhKdCT862DNVb52nZg1UZ
+        // Saber Decimal Wrapper -> DecZY86MU5Gj7kppfUCEmd4LbXXuyZH1yHaP2NTqdiZB
+        // Invariant Swap -> HyaB3W9q6XdA5xwpU4XnSZV94htfmbmqJXZcEbRaJutt
+        // Sanctum Router Program -> stkitrT1Uoy18Dk1fTrgPw8W6MVzoCfYoAFT4MLsmhq
+        // Sanctum Program -> 5ocnV1qiCgaQR8Jb8xWnVbApfaygJ8tNoZfgPwsgx9kx
+        // Openbook V2 -> opnb2LAfJYbRMAHHvqjCwQxanZn7ReEHp1k81EohpZb
+        // BonkSwap -> BSwp6bEBihVLdqJRKGgzjcGLHkcTuzmSo1TQkHepzH8p
+        // Marinade Finance -> MarBmsSgKXdrN1egZf5sqe1TMai9K1rChYNDJgjq7aD
+        // Fluxbeam Program -> FLUXubRmkEi2q6K3Y9kBPg9248ggaZVsoSFhtJHSrm1X
+        // GooseFX V2 -> GFXsSL5sSaDfNFQUYsHekbWBW1TsFdjDYzACh62tEHxn
+        // Mercurial Stable Swap -> MERLuDFBMmsHnsBPZw2sDQZHvXFMwp8EdjudcU2HKky
+        // StepN DOOAR Swap -> Dooar9JkhdZ7J3LHN3A7YCuoGRUggXhQaG4kijfLGU2j
+        // Crema Finance Program -> CLMM9tUoggJu2wagPkkqs9eFG4BWhVBZWkP1qv3Sp7tR
+        // Dexlab Swap -> DSwpgjMvXhtGn6BsbqmacdBZyfLj6jSWf3HJpdJtmg6N
+        // Saros AMM -> SSwapUtytfBdBn1b9NUGG6foMVPtcWgpRU32HToDUZr
+
+        this.swapProgramIds = ["CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK", "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4", "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc", "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo", "PhoeNiXZ8ByJGLkxNfZRnkUfjvmuYqLR89jjFHGqdXY", "JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB", "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C", "5quBtoiQqxF9Jv6KYKctB59NT3gtJD2Y65kdnB1Uev3h", "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8", "27haf8L6oxUeXrHrgEgsexjSY5hbVUWEmvv9Nyxg8vQv", "RVKd61ztZW9GUwhRbbLoYVRE5Xf1B2tVscKqwZqXgEr", "routeUGWgWzqBWFcrCfv8tritsqukccJPu3q5GPP3xS", "9W959DqEETiGZocYWCQPaJ6sBmUzgfxXfqGeTEdp3aQP", "DjVE6JNiYqPL2QXyCUUh8rNjHrbz9hXHNYt99MQ59qw1", "Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB", "2wT8Yq49kHgDzXuPxZSaeLaH1qbmGXtEyPy64bL7aD3c", "EewxydAPCCVuNEyrVN68PuSYdQ7wKn27V9Gjeoi8dy3S", "SSwpkEEcbUqx4vtoEByFjSkhKdCT862DNVb52nZg1UZ", "DecZY86MU5Gj7kppfUCEmd4LbXXuyZH1yHaP2NTqdiZB", "HyaB3W9q6XdA5xwpU4XnSZV94htfmbmqJXZcEbRaJutt", "stkitrT1Uoy18Dk1fTrgPw8W6MVzoCfYoAFT4MLsmhq", "5ocnV1qiCgaQR8Jb8xWnVbApfaygJ8tNoZfgPwsgx9kx", "opnb2LAfJYbRMAHHvqjCwQxanZn7ReEHp1k81EohpZb", "BSwp6bEBihVLdqJRKGgzjcGLHkcTuzmSo1TQkHepzH8p", "MarBmsSgKXdrN1egZf5sqe1TMai9K1rChYNDJgjq7aD", "FLUXubRmkEi2q6K3Y9kBPg9248ggaZVsoSFhtJHSrm1X", "GFXsSL5sSaDfNFQUYsHekbWBW1TsFdjDYzACh62tEHxn", "MERLuDFBMmsHnsBPZw2sDQZHvXFMwp8EdjudcU2HKky", "Dooar9JkhdZ7J3LHN3A7YCuoGRUggXhQaG4kijfLGU2j", "CLMM9tUoggJu2wagPkkqs9eFG4BWhVBZWkP1qv3Sp7tR", "DSwpgjMvXhtGn6BsbqmacdBZyfLj6jSWf3HJpdJtmg6N", "SSwapUtytfBdBn1b9NUGG6foMVPtcWgpRU32HToDUZr"]
+    }
+
+
+    public startBlockTransactionQueue = async () => {
+        let consumer = await kafkaHelper.kafka.consumer({
+            groupId: `${this.sol_block_tx_group_id}`,
+        });
+        await consumer.subscribe({
+            topic: `${this.sol_block_tx_topic}`,
+            fromBeginning: true,
+        });
+        await consumer.run({
+            eachMessage: ({ topic, partition, message }: { topic: any; partition: any; message: any }) => {
+                // console.log('🚀 ~ ~ startBlockTransactionQueue topic', topic);
+                // console.log('🚀 ~ ~ startBlockTransactionQueue message.value', message.value.toString());
+                this.getTxFromBlock(JSON.parse(message.value.toString()));
+            },
+        });
+    };
+
+    public getTxFromBlock = async (blockId: number) => {
+        try {
+            let blockInfo = await this.getBlockTransactions(blockId);
+            console.log('💥 ~ getTxFromBlock BLOCK NUMBER >>>', blockId);
+            if (!blockInfo) {
+                console.log('blockInfo >>>', blockInfo)
+                console.log(`💥 ~ do not get the block info`, `Block Number`, blockId);
+            }
+            if (blockInfo && blockInfo?.transactions && blockInfo?.transactions?.length > 0) {
+
+                for await (let trnxData of blockInfo.transactions) {
+                    if (trnxData.meta.err !== null) {
+                        console.log('💥 ~ failed tranaction', trnxData.transaction.signatures[0]);
+                        continue;
+                    }
+                    let txData: TxType;
+                    if (trnxData?.meta?.postTokenBalances?.length > 0 && trnxData?.meta?.postTokenBalances?.[1] !== undefined) {
+
+                        let dexExist: any = [];
+                        if (trnxData?.transaction?.message?.accountKeys) {
+                            dexExist = trnxData?.transaction?.message?.accountKeys?.filter((token: any) => this.swapProgramIds?.includes(token));
+                        }
+
+                        if (!dexExist.includes('JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4') && !dexExist.includes('JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB')) {
+                            continue;
+                        }
+
+                        // if (dexExist?.length > 0 && (dexExist[0] !== 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4' && dexExist[0] !== 'JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB')) {
+                        //   continue;
+                        // }
+
+                        let index = 0;
+
+                        for await (let i of trnxData?.meta.postTokenBalances) {
+                            if (trnxData?.meta?.postTokenBalances[index]?.mint !== undefined) {
+                                let checkToken: any = await solProcessHelper.checkIfContract(trnxData?.meta?.postTokenBalances[index].mint);
+                                console.log('checkToken >>>', checkToken);
+                                if (checkToken && Object.keys(checkToken)?.length > 0) {
+                                    let getAmount: any = 0;
+                                    const checkFilter: any = trnxData?.meta?.preTokenBalances?.find(
+                                        (v: any) => v.accountIndex === trnxData?.meta?.postTokenBalances?.[index]?.accountIndex
+                                    );
+                                    /**  check post balance and pre balance token match on same index */
+                                    if (
+                                        // trnxData?.meta?.preTokenBalances[index]?.mint !== undefined && 
+                                        // trnxData?.meta?.preTokenBalances[index].mint == trnxData?.meta?.postTokenBalances[index].mint &&
+                                        // trnxData?.meta?.postTokenBalances[index]?.accountIndex == trnxData?.meta?.preTokenBalances[index]?.accountIndex
+                                        checkFilter?.mint !== undefined &&
+                                        checkFilter?.mint == trnxData?.meta?.postTokenBalances[index].mint
+                                    ) {
+                                        getAmount = await this.sub(
+                                            Number(trnxData?.meta?.postTokenBalances[index]?.uiTokenAmount?.uiAmountString),
+                                            // Number(trnxData?.meta?.preTokenBalances[index]?.uiTokenAmount?.uiAmountString)
+                                            Number(checkFilter?.uiTokenAmount?.uiAmountString)
+                                        );
+                                    } else {
+                                        getAmount = Number(trnxData?.meta?.postTokenBalances[index]?.uiTokenAmount?.uiAmountString);
+                                    }
+
+                                    let is_withdraw = false;
+                                    if (typeof getAmount == undefined) {
+                                        getAmount = trnxData?.meta?.postTokenBalances[index]?.uiTokenAmount?.uiAmount;
+                                    } else if (getAmount < 0 || isNaN(getAmount)) {
+                                        // getAmount = trnxData?.meta?.postTokenBalances[index]?.uiTokenAmount?.uiAmount
+                                        getAmount = Math.abs(getAmount);
+                                        is_withdraw = true;
+                                    }
+
+                                    let fromAddress: string = trnxData.transaction.message.accountKeys[0];
+                                    // let fromAddress1: string = trnxData.transaction.message.accountKeys[0];
+                                    let toAddress: string = trnxData?.meta?.postTokenBalances[index].owner;
+                                    if (dexExist?.length > 0) {
+                                        // fromAddress = trnxData?.meta?.postTokenBalances[index].programId;
+                                        if (toAddress == fromAddress) {
+                                            fromAddress = is_withdraw ? fromAddress : dexExist[0];
+                                            toAddress = is_withdraw ? dexExist[0] : toAddress;
+                                        } else {
+                                            // fromAddress = is_withdraw ? toAddress : dexExist[0];
+                                            let fromAddress1 = fromAddress;
+                                            if (is_withdraw) {
+                                                fromAddress = toAddress;
+                                            }
+                                            if (fromAddress1 == toAddress) {
+                                                toAddress = fromAddress1;
+                                            }
+                                            // toAddress = is_withdraw ? fromAddress1 : toAddress;
+                                        }
+                                    } else {
+                                        if (toAddress == fromAddress) {
+                                            fromAddress = is_withdraw ? fromAddress : trnxData?.meta?.postTokenBalances[index].programId;
+                                            toAddress = is_withdraw ? trnxData?.meta?.postTokenBalances[index].programId : toAddress;
+                                        } else {
+                                            fromAddress = is_withdraw ? toAddress : trnxData?.meta?.postTokenBalances[index].programId;
+                                            // toAddress = is_withdraw ? fromAddress1 : toAddress;
+                                        }
+                                    }
+                                    txData = {
+                                        txId: trnxData.transaction.signatures[0],
+                                        // fromAddress: trnxData.transaction.message.accountKeys[0],
+                                        fromAddress: fromAddress,
+                                        toAddress: toAddress,
+                                        token: checkToken,
+                                        amount: Math.abs(getAmount),
+                                        blockId: blockId,
+                                        isNFTToken: false,
+                                        status: trnxData.meta.err == null ? "success" : "failed",
+                                        trnx_fee: Number(await Utility_Helper.exponentialToDecimal(
+                                            await Utility_Helper.bigNumberSafeMath(trnxData.meta.fee, "/", Math.pow(10, 9))
+                                        )),
+                                        txType: null,
+                                    };
+                                    if (txData.amount !== undefined && Math.abs(txData.amount) > 0) {
+                                        let ourTrnx: any = null;
+
+                                        let withdrawTx = await solProcessHelper.getKeyValuePair(`${config.SOL_WALLET_ADDRESS}`, txData.fromAddress);
+                                        if (withdrawTx) {
+                                            txData.txType = TrnxTypeEnum.WITHDRAW;
+                                            ourTrnx = txData;
+                                        }
+
+                                        let depositTx = await solProcessHelper.getKeyValuePair(`${config.SOL_WALLET_ADDRESS}`, txData.toAddress);
+                                        if (depositTx) {
+                                            txData.txType = TrnxTypeEnum.DEPOSIT;
+                                            ourTrnx = txData;
+                                        } else {
+                                            if (is_withdraw) {
+                                                txData.txType = TrnxTypeEnum.WITHDRAW;
+                                            }
+                                        }
+
+                                        if (ourTrnx) {
+                                            // console.log('🚀 🖐️ ~ ~ ourTrnx TOKEN', ourTrnx);
+                                            await this.addTxToQueue(
+                                                ourTrnx,
+                                                this.deposit_withdraw_topic || ''
+                                            );
+                                        }
+                                    }
+                                } else {
+                                    console.log('💥 ~ ~ token address doesnot exist', trnxData?.meta?.postTokenBalances[index].mint)
+                                }
+                            }
+                            index++;
+                        }
+                    } else {
+                        txData = {
+                            txId: trnxData.transaction.signatures[0],
+                            fromAddress: trnxData.transaction.message.accountKeys[0],
+                            toAddress: trnxData.transaction.message.accountKeys[1],
+                            token: null,
+                            amount: trnxData.meta.postBalances[1] - trnxData.meta.preBalances[1],
+                            blockId: blockId,
+                            isNFTToken: false,
+                            status: trnxData.meta.err == null ? "success" : "failed",
+                            trnx_fee: Number(await Utility_Helper.exponentialToDecimal(
+                                await Utility_Helper.bigNumberSafeMath(trnxData.meta.fee, "/", Math.pow(10, 9))
+                            )),
+                            txType: null
+                        };
+                        if (txData.amount && txData.amount > 0) {
+                            let ourTrnx: any = null;
+
+                            let withdrawTx = await solProcessHelper.getKeyValuePair(`${config.SOL_WALLET_ADDRESS}`, txData.fromAddress);
+                            if (withdrawTx) {
+                                txData.txType = TrnxTypeEnum.WITHDRAW;
+                                ourTrnx = txData;
+                            }
+
+                            let depositTx = await solProcessHelper.getKeyValuePair(`${config.SOL_WALLET_ADDRESS}`, txData.toAddress);
+                            if (depositTx) {
+                                txData.txType = TrnxTypeEnum.DEPOSIT;
+                                ourTrnx = txData;
+                            }
+
+                            if (ourTrnx) {
+                                // console.log('🚀 🖐️ ~ ~ ourTrnx NATIVE TOKEN', ourTrnx);
+                                await this.addTxToQueue(
+                                    ourTrnx,
+                                    this.deposit_withdraw_topic || ''
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.log("🔥 ~ ~ getTxFromBlock error", (error as Error).message);
+        }
+    };
+
+    public async checkAddressInDB(txData: TxType) {
+        try {
+            let ourTrnx: any = null;
+            let withdraw = await solProcessHelper.check_our_wallet_address(txData.fromAddress);
+            if (withdraw) {
+                console.log("Found the user in FROM (WITHDRAW) tx 😸");
+                txData.txType = TrnxTypeEnum.WITHDRAW;
+                ourTrnx = txData;
+            }
+            let deposit = await solProcessHelper.check_our_wallet_address(txData.toAddress);
+            if (deposit) {
+                console.log("Found the user in to (DEPOSIT) tx 😸");
+                txData.txType = TrnxTypeEnum.DEPOSIT;
+                ourTrnx = txData;
+            }
+            if (ourTrnx) {
+                await sol_tx_status_deposit_withdraw.addTxToQueue(
+                    ourTrnx,
+                    this.deposit_withdraw_topic || ""
+                );
+            }
+        } catch (err: any) {
+            console.error("Error in checkAddressInDB>>", err)
+        }
+    }
+
+    public async addTxToQueue(data: TxType, queueName: string) {
+        try {
+            await kafkaHelper.produceMessage(queueName, data)
+            //rabbitMq.send_tx_to_queue(queueName, Buffer.from(JSON.stringify(data)))
+            // await rabbitMq.assertQueue(queueName);
+            // await rabbitMq.sendToQueue(queueName, Buffer.from(JSON.stringify(data)));
+        } catch (err: any) {
+            console.error("addTxToQueue", (err as Error).message);
+            await global_helper.save_error_logs('Sol_checkAddressInDB', err.message)
+
+        }
+    };
+
+    private getBlockTransactions = async (blockNo: number) => {
+        try {
+            let rpcJson = {
+                jsonrpc: "2.0",
+                id: 1,
+                method: "getBlock",
+                params: [
+                    +blockNo,
+                    {
+                        encoding: "json",
+                        transactionDetails: "full",
+                        rewards: false,
+                        maxSupportedTransactionVersion: 0
+                    },
+                ],
+            };
+            return await Solana_Helper
+                .rpcCall(rpcJson)
+                .then((result) => {
+                    return result;
+                })
+                .catch((error) => {
+                    console.log("🔥 ~ ~ getBlockTransactions rpcCall error", error);
+                    return false;
+                });
+        } catch (err: any) {
+            console.log("🔥 ~ ~ getBlockTransactions error", err);
+            return err.message;
+        }
+    };
+
+    private sub = async (b: number, c: number) => {
+        try {
+            let b1 = b.toString().split(".");
+            let b1_max = 0;
+            if (b1.length == 2) {
+                b1_max = b1[1].length;
+            }
+            let c1 = c.toString().split(".");
+            let c1_max = 0;
+            if (c1.length == 2) {
+                c1_max = c1[1].length;
+            }
+            let max_len = b1_max > c1_max ? b1_max : c1_max;
+            return Number((b - c).toFixed(max_len));
+        } catch (error) {
+            console.log('💥 ~ ~ sub error', (error as Error).message);
+        }
+    };
+
+}
+export const sol_tx_status_deposit_withdraw = new queue_transactions()
