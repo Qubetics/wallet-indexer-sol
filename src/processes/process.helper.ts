@@ -42,11 +42,15 @@ class SolProcessHelper {
   public getLastBlockProcessed = async (blockNumber: number) => {
     try {
       const getAsync = promisify(redisClient.get).bind(redisClient);
+      console.log('config.REDISKEYS.LAST_BLOCK_NUMBER >>>', config.REDISKEYS.LAST_BLOCK_NUMBER);
       const value: any = await getAsync(config.REDISKEYS.LAST_BLOCK_NUMBER || '');
+      console.log('value >>>', value);
       // if (value) {
-      if (!isNaN(value)) { // Check if value is NOT NaN
+      if (!isNaN(value) && value) { // Check if value is NOT NaN
         return parseInt(value);
       } else {
+        console.log('value222 >>>', value);
+
         redisClient.set(
           config.REDISKEYS.LAST_BLOCK_NUMBER || '',
           blockNumber.toString()

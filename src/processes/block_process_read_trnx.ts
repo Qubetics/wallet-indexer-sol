@@ -15,7 +15,10 @@ class sol_block_process {
     public readBlocks = async () => {
         try {
             const latestBlock = Number(await this.getCurrentBlock());
+            console.log('latestBlock >>>', latestBlock);
             const lastBlockToProcess = latestBlock - this.minBlockConfirmation;
+            console.log('lastBlockToProcess >>>', lastBlockToProcess);
+
             let lastBlockProcessed = await solProcessHelper.getLastBlockProcessed(latestBlock);
             if (!lastBlockProcessed) {
                 return console.log('No block present in redis');

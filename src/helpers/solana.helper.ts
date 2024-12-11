@@ -109,7 +109,7 @@ class Solana {
 			return 0;
 		}
 	}
-	
+
 	getBalance = async (
 		address: string,
 		coin: any
