@@ -47,12 +47,15 @@ class SolDepositWithdrawProcess {
     } else {
       console.log("amount is more than 0", data)
       let coin_data: any = null;
+      let finalamount: any = 0;
       if (data.token) {
         coin_data = data.token;
+        finalamount = data.amount
       } else if (data.isNFTToken) {
         coin_data = data.isNFTToken;
       } else {
         coin_data = await solProcessHelper.NativeCoinByCoinFamily(CoinFamilyEnum.SOL);
+        finalamount = await Utility_Helper.bigNumberSafeMath(data.amount, "/", Math.pow(10, 9));
       }
       const webhookTx: WebHookTxType = {
         coin: coin_data,
@@ -60,7 +63,7 @@ class SolDepositWithdrawProcess {
         to_address: data.toAddress,
         from_address: data.fromAddress,
         block_id: data.blockId,
-        amount: data.amount,
+        amount: finalamount,
         isNFTToken: data.isNFTToken || false,
         status: 'completed',
         blockchain_status: BlockChainStatusEnum.CONFIRMED,
