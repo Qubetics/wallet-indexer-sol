@@ -17,7 +17,9 @@ import { NotificationModel } from "../models";
 // import fcmServiceAccount from "../constants/fcm.admin.key.json";
 
 import firebaseAdmin from 'firebase-admin';
-const fcmServiceAccount = require("../constants/fcm.admin.key.json");
+// const fcmServiceAccount = require("../constants/fcm.admin.key.json");
+import { fcmServiceAccount } from "../constants/fcm.admin.key";
+import { Op } from "sequelize";
 
 class UtilityHelper {
     public messaging: firebaseAdmin.messaging.Messaging;
@@ -244,16 +246,16 @@ class UtilityHelper {
                             body: data.message ? data.message : "",
                             title: data.title ? data.title : "",
                             notification_type: data.notification_type ? data.notification_type : "",
-                            tx_id: data.tx_id ? data.tx_id : 0,
+                            tx_id: data.tx_id ? data.tx_id?.toString() : 0,
                             tx_type: data.tx_type ? data.tx_type : "",
-                            from_user_id: data.from_user_id ? data.from_user_id : 0,
-                            user_coin_id: data.coin_id ? data.coin_id : 0,
+                            from_user_id: data.from_user_id ? data.from_user_id?.toString() : 0,
+                            user_coin_id: data.coin_id ? data.coin_id?.toString() : 0,
                             announcement_title: announcement_title,
                             announcement_message: announcement_message,
                         }
                     })
                     .then((response: any) => {
-                        console.log("💥🚀 ~ firebase admin push notification", response);
+                        console.log("💥🚀 ~ firebase admin push notification", JSON.stringify(response));
                     })
                     .catch((error: any) => {
                         console.error(
@@ -283,10 +285,10 @@ class UtilityHelper {
             /* save notification */
             const checkOldNotif: any = await NotificationModel.count({
                 where: {
-                    to_user_id: toUserId,
+                    wallet_address: { [Op.like]: data.wallet_address },
                     notification_type: data.notification_type,
                     tx_id: data.tx_id,
-                    tx_type: data.tx_type,
+                    // tx_type: data.tx_type,
                 },
             });
             if (checkOldNotif == 0) {
