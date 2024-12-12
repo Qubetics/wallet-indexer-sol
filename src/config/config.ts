@@ -20,9 +20,9 @@ export const config = {
   //TOKEN_TYPE721_ETH: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.TOKEN_TYPE721_ETH}`,
   STATIC_COIN_FAMILY: zookeeperConfig.config.STATIC_COIN_FAMILY,
   // added new
-  KEYS: {
-    FCM_PUSH: zookeeperConfig.config.FCM_PUSH
-  },
+  // KEYS: {
+  //   FCM_PUSH: zookeeperConfig.config.FCM_PUSH
+  // },
   REDISKEYS: {
     LAST_BLOCK_NUMBER: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.LAST_BLOCK_NUMBER_SOL}`,
     ALL_PROCESSES: zookeeperConfig.config.ALL_PROCESSES,

@@ -1,31 +1,34 @@
 import BigNumber from "bignumber.js";
 // import FCM from 'fcm-push';
 // /import FCM from 'fcm-node'
-var FCM = require("fcm-node");
+// var FCM = require("fcm-node");
 
 
 import {
     Db_Helper
 } from ".";
 
-import {
-    config
-} from "../config/config";
+// import {
+//     config
+// } from "../config/config";
 
 import { NotificationModel } from "../models";
-const firebaseAdmin = require("firebase-admin");
-import fcmServiceAccount from "../constants/fcm.admin.key.json";
+// const firebaseAdmin = require("firebase-admin");
+// import fcmServiceAccount from "../constants/fcm.admin.key.json";
+
+import firebaseAdmin from 'firebase-admin';
+const fcmServiceAccount = require("../constants/fcm.admin.key.json");
 
 class UtilityHelper {
+    public messaging: firebaseAdmin.messaging.Messaging;
     constructor() {
-        (async () => {
-            await firebaseAdmin.initializeApp({
-                credential: firebaseAdmin.credential.cert(fcmServiceAccount),
-            });
-        })();
+        firebaseAdmin.initializeApp({
+            credential: firebaseAdmin.credential.cert(fcmServiceAccount),
+        });
+        this.messaging = firebaseAdmin.messaging();
     }
     //    public REDIS_BLOCKS: string = `${CONFIG.REDISKEYS.BLOCKS}_${CONFIG.COIN_FAMILY_ETH}`;
-    public FCM_SERVER_KEY: any = config.KEYS.FCM_PUSH;
+    // public FCM_SERVER_KEY: any = config.KEYS.FCM_PUSH;
 
     bigNumberSafeMath = async (c: any, operation: any, d: any) => {
         18;
@@ -63,7 +66,6 @@ class UtilityHelper {
     convertAmount = async (hexAmount: any) => {
         return new BigNumber("0x" + hexAmount.toString());
     }
-
 
     exponentialToDecimal = async (exponential: number) => {
         let decimal: string = exponential.toString().toLowerCase();
@@ -233,10 +235,10 @@ class UtilityHelper {
                     body: data.message,
                 };
 
-                messaging
-                    .sendMulticast({
+                this.messaging
+                    .sendEachForMulticast({
                         tokens: finalDeviceTokens,
-                        collapse_key: "type_a",
+                        // collapse_key: "type_a",
                         notification: notification,
                         data: {
                             body: data.message ? data.message : "",
