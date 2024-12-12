@@ -231,12 +231,27 @@ class UtilityHelper {
             if (finalDeviceTokens?.length > 0) {
                 let announcement_title: string = data.announcement_title == undefined ? "" : data.announcement_title;
                 let announcement_message: string = data.announcement_message == undefined ? "" : data.announcement_message;
-                const messaging = firebaseAdmin.messaging();
+                // const messaging = firebaseAdmin.messaging();
                 const notification = {
                     title: data.title,
                     body: data.message,
                 };
-
+                console.log('fffffffffff', {
+                    tokens: finalDeviceTokens,
+                    // collapse_key: "type_a",
+                    notification: notification,
+                    data: {
+                        body: data.message ? data.message : "",
+                        title: data.title ? data.title : "",
+                        notification_type: data.notification_type ? data.notification_type : "",
+                        tx_id: data.tx_id ? data.tx_id?.toString() : "0",
+                        tx_type: data.tx_type ? data.tx_type : "",
+                        from_user_id: data.from_user_id ? data.from_user_id?.toString() : "0",
+                        user_coin_id: data.coin_id ? data.coin_id?.toString() : "0",
+                        announcement_title: announcement_title,
+                        announcement_message: announcement_message,
+                    }
+                });
                 this.messaging
                     .sendEachForMulticast({
                         tokens: finalDeviceTokens,
@@ -246,10 +261,10 @@ class UtilityHelper {
                             body: data.message ? data.message : "",
                             title: data.title ? data.title : "",
                             notification_type: data.notification_type ? data.notification_type : "",
-                            tx_id: data.tx_id ? data.tx_id?.toString() : 0,
+                            tx_id: data.tx_id ? data.tx_id?.toString() : "0",
                             tx_type: data.tx_type ? data.tx_type : "",
-                            from_user_id: data.from_user_id ? data.from_user_id?.toString() : 0,
-                            user_coin_id: data.coin_id ? data.coin_id?.toString() : 0,
+                            from_user_id: data.from_user_id ? data.from_user_id?.toString() : "0",
+                            user_coin_id: data.coin_id ? data.coin_id?.toString() : "0",
                             announcement_title: announcement_title,
                             announcement_message: announcement_message,
                         }
