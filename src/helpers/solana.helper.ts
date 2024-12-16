@@ -6,8 +6,10 @@ import { BooleanEnum, TokenStandard } from "../enum";
 
 class Solana {
 	public connection: Connection;
+	public connectionNew: Connection;
 	constructor() {
 		this.connection = new Connection(config.config.NODE.SOL_RPC_URL || '', 'confirmed');
+		this.connectionNew = new Connection("https://solana-mainnet.g.alchemy.com/v2/REDACTED");
 	}
 	// public rpcCall = async (body: {}) => {
 	// 	try {
@@ -90,14 +92,14 @@ class Solana {
 		try {
 			const walletPublicKey = new PublicKey(walletAddress);
 			const mintPublicKey = new PublicKey(tokenAddress);
-			const tokenAccounts = await this.connection.getTokenAccountsByOwner(walletPublicKey, {
+			const tokenAccounts = await this.connectionNew.getTokenAccountsByOwner(walletPublicKey, {
 				mint: mintPublicKey,
 			});
 			if (tokenAccounts.value?.length > 0) {
 				const tokenAccount = tokenAccounts.value[0].account;
 				const tokenAccountInfo = AccountLayout.decode(tokenAccount.data);
 				const amount = tokenAccountInfo.amount;
-				const mintInfo: any = await this.connection.getParsedAccountInfo(mintPublicKey);
+				const mintInfo: any = await this.connectionNew.getParsedAccountInfo(mintPublicKey);
 				const decimals = mintInfo.value.data.parsed.info.decimals;
 				const balance = Number(amount) / (10 ** decimals);
 				return balance;
