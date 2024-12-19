@@ -139,39 +139,36 @@ class SolTxStatusUpdateProcess {
       if (txUpdateRes) {
         if (status_tx == BlockChainStatusEnum.CONFIRMED) {
           /** save rewrad */
-          if (tx_type == TrnxTypeEnum.SWAP) {
-            console.log("transaction >>", tx_type, "transaction id ", tx_row_id)
-            // if (amount_in_fiat && amount_in_fiat > 0) {
-            //   //REWARD_PERCENTAGE
-            //   await Db_Helper.save_reward({ tx_id: tx_row_id, type: tx_type, amount_in_fiat: amount_in_fiat, user_id: user_id, fiat_type: fiat_type, cmc_id: cmc_id })
-            // }
-          }
+          // if (tx_type == TrnxTypeEnum.SWAP) {
+          //   console.log("transaction >>", tx_type, "transaction id ", tx_row_id)
+          //   // if (amount_in_fiat && amount_in_fiat > 0) {
+          //   //   //REWARD_PERCENTAGE
+          //   //   await Db_Helper.save_reward({ tx_id: tx_row_id, type: tx_type, amount_in_fiat: amount_in_fiat, user_id: user_id, fiat_type: fiat_type, cmc_id: cmc_id })
+          //   // }
+          // }
 
           let AddressWithdraw: any = await solProcessHelper.check_our_wallet_address(from_address);
           if (AddressWithdraw) {
             /** update withdraw user eth balance */
-
             const native_coin: any = await solProcessHelper.NativeCoinByCoinFamily(coin_family);
             await Wallet_Helper.Update_Balance(from_address, native_coin);
             if (trx_data?.coin?.is_token === BooleanEnum.true && trx_data.coin?.token_type.toLowerCase() === TokenStandard.SPL.toLowerCase()) {
               /** Update User ERC20 Token Balance */
               await Wallet_Helper.Update_Balance(from_address, trx_data?.coin);
             }
-
-
             let trnxTypeW: string = "Withdraw";
             switch (tx_type) {
-              // case TrnxTypeEnum.DAPP:
-              //   trnxTypeW = "Smart Contract Execution";
-              //   break;
-              // case TrnxTypeEnum.APPROVE:
-              //   trnxTypeW = "Approval";
-              //   break;
+              case TrnxTypeEnum.DAPP:
+                trnxTypeW = "Smart Contract Execution";
+                break;
+              case TrnxTypeEnum.APPROVE:
+                trnxTypeW = "Approval";
+                break;
               case TrnxTypeEnum.SWAP:
                 trnxTypeW = "Swap";
                 break;
               case TrnxTypeEnum.CROSS_CHAIN:
-                trnxTypeW = "Cross-chain Swap";
+                trnxTypeW = "Cross chain Swap";
                 break;
               default:
                 break;
@@ -181,7 +178,7 @@ class SolTxStatusUpdateProcess {
             )} ${coin_symbol.toUpperCase()} has been confirmed.`;
 
             let notifData: NotificationInterface = {
-              title: NotificationTypeEnum.WITHDRAW.toUpperCase(),
+              title: trnxTypeW.toUpperCase(),
               message: notiMsg,
               amount: amount,
               from_user_id: 0,
@@ -192,7 +189,7 @@ class SolTxStatusUpdateProcess {
               coin_id: trx_data?.coin?.coin_id,
               coin_family: trx_data?.coin.coin_family,
               tx_type: tx_type,
-              notification_type: NotificationTypeEnum.WITHDRAW,
+              notification_type: trnxTypeW,
               state: "confirmed"
             };
             Utility_Helper.SendNotification(notifData);
@@ -201,22 +198,22 @@ class SolTxStatusUpdateProcess {
           if (Addressdeposit) {
             let to_user_id: number = Addressdeposit ? Addressdeposit.user_id : 0;
             let trnxTypeD: string = "Deposit";
-            switch (tx_type) {
-              // case TrnxTypeEnum.DAPP:
-              //   trnxTypeD = "Smart Contract Execution";
-              //   break;
-              // case TrnxTypeEnum.APPROVE:
-              //   trnxTypeD = "Approval";
-              //   break;
-              case TrnxTypeEnum.SWAP:
-                trnxTypeD = "Swap";
-                break;
-              case TrnxTypeEnum.CROSS_CHAIN:
-                trnxTypeD = "Cross-chain Swap";
-                break;
-              default:
-                break;
-            }
+            // switch (tx_type) {
+            //   case TrnxTypeEnum.DAPP:
+            //     trnxTypeD = "Smart Contract Execution";
+            //     break;
+            //   case TrnxTypeEnum.APPROVE:
+            //     trnxTypeD = "Approval";
+            //     break;
+            //   case TrnxTypeEnum.SWAP:
+            //     trnxTypeD = "Swap";
+            //     break;
+            //   case TrnxTypeEnum.CROSS_CHAIN:
+            //     trnxTypeD = "Cross-chain Swap";
+            //     break;
+            //   default:
+            //     break;
+            // }
             /** update to adrs wallet balance */
             if (to_address !== from_address) {
               let balance: any = await Wallet_Helper.Update_Balance(
@@ -230,7 +227,7 @@ class SolTxStatusUpdateProcess {
             )} ${trx_data?.coin?.coin_symbol.toUpperCase()} has been confirmed.`;
 
             let notifData: NotificationInterface = {
-              title: NotificationTypeEnum.DEPOSIT.toUpperCase(),
+              title: trnxTypeD.toUpperCase(),
               message: notiMsg,
               amount: amount,
               from_user_id: user_id,
@@ -241,18 +238,33 @@ class SolTxStatusUpdateProcess {
               coin_id: trx_data?.coin?.coin_id,
               coin_family: trx_data?.coin?.coin_family,
               tx_type: tx_type,
-              notification_type: NotificationTypeEnum.DEPOSIT,
+              notification_type: trnxTypeD,
               state: "confirmed"
             };
             Utility_Helper.SendNotification(notifData);
           }
-
           return true;
-
         } else if (status_tx == BlockChainStatusEnum.FAILED) {
-          let notiMsg = trx_data?.coin.token_type === "ERC721" ? `Withdraw of NFT(${trx_data?.coin.coin_symbol.toUpperCase()}) with token id ${amount} has been confirmed.` : `Withdraw request of ${await Utility_Helper.bigNumberSafeConversion(amount)} ${trx_data?.coin.coin_symbol.toUpperCase()} has been failed.`;
+          let trnxTypeW: string = "Withdraw";
+          switch (tx_type) {
+            case TrnxTypeEnum.DAPP:
+              trnxTypeW = "Smart Contract Execution";
+              break;
+            case TrnxTypeEnum.APPROVE:
+              trnxTypeW = "Approval";
+              break;
+            case TrnxTypeEnum.SWAP:
+              trnxTypeW = "Swap";
+              break;
+            case TrnxTypeEnum.CROSS_CHAIN:
+              trnxTypeW = "Cross chain Swap";
+              break;
+            default:
+              break;
+          }
+          let notiMsg = trx_data?.coin.token_type === "ERC721" ? `Withdraw of NFT(${trx_data?.coin.coin_symbol.toUpperCase()}) with token id ${amount} has been confirmed.` : `${trnxTypeW} request of ${await Utility_Helper.bigNumberSafeConversion(amount)} ${trx_data?.coin.coin_symbol.toUpperCase()} has been failed.`;
           let notifData: NotificationInterface = {
-            title: NotificationTypeEnum.WITHDRAW.toUpperCase(),
+            title: trnxTypeW.toUpperCase(),
             message: notiMsg,
             amount: amount,
             from_user_id: 0,
@@ -263,7 +275,7 @@ class SolTxStatusUpdateProcess {
             coin_id: trx_data?.coin?.coin_id,
             coin_family: trx_data?.coin?.coin_family,
             tx_type: tx_type,
-            notification_type: NotificationTypeEnum.WITHDRAW,
+            notification_type: trnxTypeW,
             state: "failed"
           };
           Utility_Helper.SendNotification(notifData);

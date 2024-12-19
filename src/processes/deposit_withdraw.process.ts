@@ -181,22 +181,22 @@ class SolDepositWithdrawProcess {
 
       if (Addressdeposit) {
         let trnxTypeD: string = "Deposit";
-        switch (tx_type) {
-          // case TrnxTypeEnum.SMARTCONTRACTINTERACTION:
-          //   trnxTypeD = "Smart Contract Interaction";
-          //   break;
-          // case TrnxTypeEnum.APPROVE:
-          //   trnxTypeD = "Approval";
-          //   break;
-          case TrnxTypeEnum.SWAP:
-            trnxTypeD = "Swap";
-            break;
-          case TrnxTypeEnum.CROSS_CHAIN:
-            trnxTypeD = "Cross-chain Swap";
-            break;
-          default:
-            break;
-        }
+        // switch (tx_type) {
+        //   // case TrnxTypeEnum.SMARTCONTRACTINTERACTION:
+        //   //   trnxTypeD = "Smart Contract Interaction";
+        //   //   break;
+        //   // case TrnxTypeEnum.APPROVE:
+        //   //   trnxTypeD = "Approval";
+        //   //   break;
+        //   case TrnxTypeEnum.SWAP:
+        //     trnxTypeD = "Swap";
+        //     break;
+        //   case TrnxTypeEnum.CROSS_CHAIN:
+        //     trnxTypeD = "Cross-chain Swap";
+        //     break;
+        //   default:
+        //     break;
+        // }
         /** update to adrs wallet balance */
         let balance: any = await Wallet_Helper.Update_Balance(
           to_address, /// wallet_address,
@@ -208,7 +208,7 @@ class SolDepositWithdrawProcess {
         )} ${coin?.coin_symbol?.toUpperCase()} has been confirmed.`;
 
         let notifData: NotificationInterface = {
-          title: NotificationTypeEnum.DEPOSIT?.toUpperCase(),
+          title: trnxTypeD?.toUpperCase(),
           message: notiMsg,
           amount: amount,
           from_user_id: user_id,
@@ -219,7 +219,7 @@ class SolDepositWithdrawProcess {
           coin_id: coin.coin_id,
           coin_family: coin.coin_family,
           tx_type: tx_type,
-          notification_type: NotificationTypeEnum.DEPOSIT,
+          notification_type: trnxTypeD,
           state: "confirmed"
         };
         Utility_Helper.SendNotification(notifData);
@@ -230,17 +230,17 @@ class SolDepositWithdrawProcess {
         // let notificationTypeW: NotificationTypeEnum = NotificationTypeEnum.WITHDRAW;
 
         switch (tx_type) {
-          // case TrnxTypeEnum.SMARTCONTRACTINTERACTION:
-          //   trnxTypeW = "Smart Contract Interaction";
-          //   break;
-          // case TrnxTypeEnum.APPROVE:
-          //   trnxTypeW = "Approval";
-          //   break;
+          case TrnxTypeEnum.SMARTCONTRACTINTERACTION:
+            trnxTypeW = "Smart Contract Interaction";
+            break;
+          case TrnxTypeEnum.APPROVE:
+            trnxTypeW = "Approval";
+            break;
           case TrnxTypeEnum.SWAP:
             trnxTypeW = "Swap";
             break;
           case TrnxTypeEnum.CROSS_CHAIN:
-            trnxTypeW = "Cross-chain Swap";
+            trnxTypeW = "Cross chain Swap";
             break;
           default:
             break;
@@ -264,7 +264,7 @@ class SolDepositWithdrawProcess {
         )} ${coin.coin_symbol?.toUpperCase()} has been confirmed.`;
 
         let notifData: NotificationInterface = {
-          title: NotificationTypeEnum.WITHDRAW?.toUpperCase(),
+          title: trnxTypeW?.toUpperCase(),
           amount: amount,
           message: notiMsg,
           from_user_id: 0,
@@ -275,7 +275,7 @@ class SolDepositWithdrawProcess {
           coin_symbol: coin.coin_symbol,
           coin_family: coin.coin_family,
           coin_id: coin.coin_id,
-          notification_type: NotificationTypeEnum.WITHDRAW,
+          notification_type: trnxTypeW,
           state: "confirmed"
         };
 
