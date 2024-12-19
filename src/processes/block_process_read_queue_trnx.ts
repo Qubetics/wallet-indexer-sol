@@ -102,7 +102,7 @@ class queue_transactions {
                         let index = 0;
 
                         for await (let i of trnxData?.meta.postTokenBalances) {
-                            if (trnxData?.meta?.postTokenBalances[index]?.mint !== undefined) {
+                            if (trnxData?.meta?.postTokenBalances[index]?.mint !== undefined && trnxData?.meta?.postTokenBalances[index]?.owner == trnxData.transaction.message.accountKeys[0]) {
                                 let checkToken: any = await solProcessHelper.checkIfContract(trnxData?.meta?.postTokenBalances[index].mint);
                                 console.log('checkToken >>>', checkToken);
                                 if (checkToken && Object.keys(checkToken)?.length > 0) {
