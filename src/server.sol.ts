@@ -2,10 +2,10 @@ import { solWithdrawDepositProcess, solPendingWithdrawalProcess, solTxStatusUpda
 import schedule from "node-schedule";
 class ETHStartProcess {
   constructor() {
-    // this.read_block_process()
-    // this.readSpecificBlock()
-    // this.consume_read_block_queue()
-    // this.solWithdrawDepositProcess();
+    this.read_block_process()
+    this.readSpecificBlock()
+    this.consume_read_block_queue()
+    this.solWithdrawDepositProcess();
     this.getPendingWithdrawalTxProcess();
     this.updateTxStatusProcess();
     this.SolUpdateBalance();
