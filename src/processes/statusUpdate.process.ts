@@ -90,25 +90,30 @@ class SolTxStatusUpdateProcess {
   }) => {
     try {
       let coin_data: any = await solProcessHelper.CoinByCoinId(txData.coin_id);
-      const trx_data = {
-        coin_id: txData?.coin_id,
-        status: txData?.status,
-        txid: txData?.txid,
-        gas_reverted: txData?.gasReverted,
-        tx_fee: txData?.tx_fee,
-        fromAddress: txData?.fromAddress,
-        coin: {
+      if (coin_data) {
+        const trx_data = {
           coin_id: txData?.coin_id,
-          is_token: coin_data.is_token,
-          token_type: coin_data.token_type,
-          coin_symbol: coin_data.coin_symbol,
-          coin_family: coin_data.coin_family,
-          cmc_id: coin_data.cmc_id,
-          token_address: Number(coin_data.is_token) === Number(BooleanEnum.true) ? coin_data.token_address : coin_data.coin_symbol
-        }
-      };
-      console.log(trx_data, "withdrwal");
-      await this.updateBroadcastTx(trx_data);
+          status: txData?.status,
+          txid: txData?.txid,
+          gas_reverted: txData?.gasReverted,
+          tx_fee: txData?.tx_fee,
+          fromAddress: txData?.fromAddress,
+          coin: {
+            coin_id: txData?.coin_id,
+            is_token: coin_data.is_token,
+            token_type: coin_data.token_type,
+            coin_symbol: coin_data.coin_symbol,
+            coin_family: coin_data.coin_family,
+            cmc_id: coin_data.cmc_id,
+            token_address: Number(coin_data.is_token) === Number(BooleanEnum.true) ? coin_data.token_address : coin_data.coin_symbol
+          }
+        };
+        console.log(trx_data, "withdrwal");
+        await this.updateBroadcastTx(trx_data);
+      } else {
+        console.log('not found coin_data >>>', coin_data);
+      }
+
 
 
     } catch (error: any) {
