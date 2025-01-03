@@ -11,26 +11,6 @@ class Solana {
 		this.connection = new Connection(config.config.NODE.SOL_RPC_URL || '', 'confirmed');
 		this.connectionNew = new Connection("https://solana-mainnet.g.alchemy.com/v2/REDACTED");
 	}
-	// public rpcCall = async (body: {}) => {
-	// 	try {
-	// 		const result = async (resolve: any, reject: any) => {
-	// 			const options = { headers: { "Content-Type": "application/json" } };
-	// 			await axios.post(`${config.RPC_URL}`, body, options)
-	// 				.then((data: any) => {
-	// 					if (data.status == 200) {
-	// 						resolve(data.data.result);
-	// 					} else {
-	// 						reject(false);
-	// 					}
-	// 				});
-	// 		};
-	// 		return new Promise(result);
-	// 	} catch (error: any) {
-	// 		console.log('🔥 ~ rpcCall web3.helper.ts error', error);
-	// 		return error.message;
-	// 	}
-	// };
-
 
 	public rpcCall = async (body: {}) => {
 		try {
@@ -77,16 +57,6 @@ class Solana {
 			return 0;
 		}
 	}
-
-	// public async getUserCRC20TokenBalance(tokenAddress: string | null | undefined, walletAddress: string): Promise<number> {
-	//     try {
-	//         let tokenBalance = await solTokenObj.tokenBalance(walletAddress, tokenAddress);
-	//         return tokenBalance;
-	//     } catch (error: any) {
-	//         console.log('🔥 ~ ~ getUserCRC20TokenBalance node.solana.helper.ts error', error);
-	//         return 0;
-	//     }
-	// }
 
 	public async getCRC20TokenBalance(tokenAddress: string, walletAddress: string): Promise<number> {
 		try {

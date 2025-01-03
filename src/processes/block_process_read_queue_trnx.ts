@@ -71,7 +71,7 @@ class queue_transactions {
     public getTxFromBlock = async (blockId: number) => {
         try {
             let blockInfo = await this.getBlockTransactions(blockId);
-            console.log('💥 ~ getTxFromBlock BLOCK NUMBER >>>', blockId);
+            // console.log('💥 ~ getTxFromBlock BLOCK NUMBER >>>', blockId);
             if (!blockInfo) {
                 console.log('blockInfo >>>', blockInfo)
                 console.log(`💥 ~ do not get the block info`, `Block Number`, blockId);
@@ -104,7 +104,7 @@ class queue_transactions {
                         for await (let i of trnxData?.meta.postTokenBalances) {
                             if (trnxData?.meta?.postTokenBalances[index]?.mint !== undefined && trnxData?.meta?.postTokenBalances[index]?.owner == trnxData.transaction.message.accountKeys[0]) {
                                 let checkToken: any = await solProcessHelper.checkIfContract(trnxData?.meta?.postTokenBalances[index].mint);
-                                console.log('checkToken >>>', checkToken);
+                                // console.log('checkToken >>>', checkToken);
                                 if (checkToken && Object.keys(checkToken)?.length > 0) {
                                     let getAmount: any = 0;
                                     const checkFilter: any = trnxData?.meta?.preTokenBalances?.find(

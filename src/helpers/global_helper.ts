@@ -9,7 +9,7 @@ class Global_helper {
     public async check_coin_in_wallet(wallet_address: string, coin: CoinInterface, balance: any) {
         try {
             let wallet_data: any = await WalletModel.findOne({
-                attributes: ["balance", "user_id", "wallet_name"],
+                attributes: ["balance", "user_id"],
                 where: {
                     wallet_address: wallet_address,
                     coin_id: coin.coin_id,
@@ -31,17 +31,6 @@ class Global_helper {
                     status: 1
                 }
                 await WalletModel.create(data_obj)
-            } else {
-                let updateObj: any = { status: 1 }
-                if (balance) {
-                    updateObj.balance = balance
-                }
-                await WalletModel.update(updateObj, {
-                    where: {
-                        wallet_address: wallet_address,
-                        coin_id: coin.coin_id,
-                    }
-                })
             }
 
             console.log("wallet created>>", wallet_data)
