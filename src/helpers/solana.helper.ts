@@ -58,7 +58,7 @@ class Solana {
 		}
 	}
 
-	public async getCRC20TokenBalance(tokenAddress: string, walletAddress: string): Promise<number> {
+	public async getCRC20TokenBalance(walletAddress: string, tokenAddress: string): Promise<number> {
 		try {
 			const walletPublicKey = new PublicKey(walletAddress);
 			const mintPublicKey = new PublicKey(tokenAddress);
