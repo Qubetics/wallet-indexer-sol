@@ -89,7 +89,7 @@ class Solana {
 		try {
 			let balance: number = 0;
 			if (coin.is_token == BooleanEnum.true) {
-				switch (coin.token_type.toLowerCase()) {
+				switch (coin.token_type) {
 
 					case TokenStandard.SPL:
 						balance = await this.getCRC20TokenBalance(

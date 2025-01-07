@@ -64,6 +64,8 @@ class WalletHelper {
                 wallet_address,
                 coin
             );
+            console.log('balance >>>', balance);
+            console.log('coin >>>', coin);
             if (balance !== null) {
                 let wallet_data: any = await WalletModel.findOne({
                     attributes: ["balance"],
