@@ -7,9 +7,11 @@ import { BooleanEnum, TokenStandard } from "../enum";
 class Solana {
 	public connection: Connection;
 	public connectionNew: Connection;
+	public connectionPublic: Connection;
 	constructor() {
 		this.connection = new Connection(config.config.NODE.SOL_RPC_URL || '', 'confirmed');
 		this.connectionNew = new Connection("https://solana-mainnet.g.alchemy.com/v2/REDACTED");
+		this.connectionPublic = new Connection("https://api.mainnet-beta.solana.com");
 	}
 
 	public rpcCall = async (body: {}) => {
@@ -58,28 +60,66 @@ class Solana {
 		}
 	}
 
+	// public async getCRC20TokenBalance(walletAddress: string, tokenAddress: string): Promise<number> {
+	// 	try {
+	// 		const walletPublicKey = new PublicKey(walletAddress);
+	// 		const mintPublicKey = new PublicKey(tokenAddress);
+	// 		const tokenAccounts = await this.connectionNew.getTokenAccountsByOwner(walletPublicKey, {
+	// 			mint: mintPublicKey,
+	// 		});
+	// 		if (tokenAccounts.value?.length > 0) {
+	// 			const tokenAccount = tokenAccounts.value[0].account;
+	// 			const tokenAccountInfo = AccountLayout.decode(tokenAccount.data);
+	// 			const amount = tokenAccountInfo.amount;
+	// 			const mintInfo: any = await this.connectionNew.getParsedAccountInfo(mintPublicKey);
+	// 			const decimals = mintInfo.value.data.parsed.info.decimals;
+	// 			const balance = Number(amount) / (10 ** decimals);
+	// 			return balance;
+	// 		} else {
+	// 			return 0;
+	// 		}
+	// 	} catch (error: any) {
+	// 		console.log('🔥 ~ ~ getUserCRC20TokenBalance node.solana.helper.ts error', error);
+	// 		return 0;
+	// 	}
+	// }
+
 	public async getCRC20TokenBalance(walletAddress: string, tokenAddress: string): Promise<number> {
-		try {
+		const fetchTokenAccountBalance = async (connection: any): Promise<number> => {
 			const walletPublicKey = new PublicKey(walletAddress);
 			const mintPublicKey = new PublicKey(tokenAddress);
-			const tokenAccounts = await this.connectionNew.getTokenAccountsByOwner(walletPublicKey, {
-				mint: mintPublicKey,
-			});
-			if (tokenAccounts.value?.length > 0) {
-				const tokenAccount = tokenAccounts.value[0].account;
-				const tokenAccountInfo = AccountLayout.decode(tokenAccount.data);
-				const amount = tokenAccountInfo.amount;
-				const mintInfo: any = await this.connectionNew.getParsedAccountInfo(mintPublicKey);
-				const decimals = mintInfo.value.data.parsed.info.decimals;
-				const balance = Number(amount) / (10 ** decimals);
-				return balance;
-			} else {
+
+			try {
+				const tokenAccounts = await connection.getTokenAccountsByOwner(walletPublicKey, {
+					mint: mintPublicKey,
+				});
+
+				if (tokenAccounts.value?.length > 0) {
+					const tokenAccount = tokenAccounts.value[0].account;
+					const tokenAccountInfo = AccountLayout.decode(tokenAccount.data);
+					const amount = tokenAccountInfo.amount;
+					const mintInfo: any = await connection.getParsedAccountInfo(mintPublicKey);
+					const decimals = mintInfo.value.data.parsed.info.decimals;
+					const balance = Number(amount) / (10 ** decimals);
+					return balance;
+				}
+				return 0;
+			} catch (error) {
+				console.log('🔥 ~ ~ Error fetching token balance:', error);
 				return 0;
 			}
-		} catch (error: any) {
-			console.log('🔥 ~ ~ getUserCRC20TokenBalance node.solana.helper.ts error', error);
-			return 0;
+		};
+
+		// Try fetching from the "new" connection
+		let balance = await fetchTokenAccountBalance(this.connectionNew);
+
+		// If no balance from the "new" connection, fall back to public node
+		if (balance === 0) {
+			console.log('🚀 ~ Falling back to PUBLIC NODE');
+			balance = await fetchTokenAccountBalance(this.connectionPublic);
 		}
+
+		return balance;
 	}
 
 	getBalance = async (
