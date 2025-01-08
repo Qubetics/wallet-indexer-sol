@@ -91,7 +91,7 @@ class queue_transactions {
                             dexExist = trnxData?.transaction?.message?.accountKeys?.filter((token: any) => this.swapProgramIds?.includes(token));
                         }
 
-                        if (!dexExist.includes('JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4') && !dexExist.includes('JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB')) {
+                        if (!dexExist.includes('JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4') && !dexExist.includes('JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB') && !dexExist.includes('routeUGWgWzqBWFcrCfv8tritsqukccJPu3q5GPP3xS')) {
                             continue;
                         }
 
