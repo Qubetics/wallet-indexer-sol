@@ -18,10 +18,6 @@ let dataObj = {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
-  // email: {
-  //   type: DataTypes.STRING,
-  //   allowNull: true,
-  // },
   wallet_name: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -42,30 +38,30 @@ let dataObj = {
     type: DataTypes.DOUBLE,
     allowNull: false,
   },
-  balance_blocked: {
-    type: DataTypes.DOUBLE,
-    allowNull: true,
-  },
-  user_withdraw_limit: {
-    type: DataTypes.FLOAT,
-    allowNull: true,
-  },
+  // balance_blocked: {
+  //   type: DataTypes.DOUBLE,
+  //   allowNull: true,
+  // },
+  // user_withdraw_limit: {
+  //   type: DataTypes.FLOAT,
+  //   allowNull: true,
+  // },
   default_wallet: {
     type: DataTypes.TINYINT,
     allowNull: true,
   },
-  is_verified: {
-    type: DataTypes.TINYINT,
-    allowNull: true,
-  },
+  // is_verified: {
+  //   type: DataTypes.TINYINT,
+  //   allowNull: true,
+  // },
   status: {
     type: DataTypes.TINYINT,
     allowNull: true,
   },
-  is_deleted: {
-    type: DataTypes.TINYINT,
-    allowNull: true,
-  },
+  // is_deleted: {
+  //   type: DataTypes.TINYINT,
+  //   allowNull: true,
+  // },
   sort_order: {
     type: DataTypes.INTEGER,
     allowNull: true,
@@ -104,10 +100,10 @@ let dataObjIndex = {
       unique: false,
       fields: ["default_wallet"],
     },
-    {
-      unique: false,
-      fields: ["is_verified"],
-    },
+    // {
+    //   unique: false,
+    //   fields: ["is_verified"],
+    // },
     {
       unique: false,
       fields: ["status"],
