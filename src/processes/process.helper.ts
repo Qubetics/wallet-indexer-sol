@@ -14,7 +14,6 @@ class SolProcessHelper {
 
   constructor() {
     this.fetchSPLTokens();
-    // this.fetchERC721Tokens();
     this.fetchWalletAddress();
   }
   public async getKeyValuePair(keyName: string, field: string) {
@@ -45,7 +44,6 @@ class SolProcessHelper {
       console.log('config.REDISKEYS.LAST_BLOCK_NUMBER >>>', config.REDISKEYS.LAST_BLOCK_NUMBER);
       const value: any = await getAsync(config.REDISKEYS.LAST_BLOCK_NUMBER || '');
       console.log('value >>>', value);
-      // if (value) {
       if (!isNaN(value) && value) { // Check if value is NOT NaN
         return parseInt(value);
       } else {
@@ -60,25 +58,7 @@ class SolProcessHelper {
       console.log(`💥 ~ ~ getLastBlockProcessed error`, error);
     }
   };
-  // public async setBlocks(field: string, key: string, minBlockConfirmation: number, newBlock: number | null) {
-  //   try {
-  //     let { getBlockNumber } = Blockchain_Helper.Web3.eth;
-  //     let latestBlock = await getBlockNumber();
-  //     latestBlock = latestBlock - minBlockConfirmation;
-  //     if (newBlock) {
-  //       if (newBlock < latestBlock) {
-  //         await ethProcessHelper.setKeyValuePair(field, key, latestBlock.toString())
-  //       } else {
-  //         console.log("No updation of blocks")
-  //       }
-  //     } else {
-  //       await ethProcessHelper.setKeyValuePair(field, key, latestBlock.toString())
-  //     }
-  //   } catch (err: any) {
-  //     console.error("Error in  getBlocks", err)
-  //     await global_helper.save_error_logs('ETH_setBlocks', err.message)
-  //   }
-  // }
+
   public async setKeyValuePair(keyName: string, field: string, value: string) {
     try {
       redisClient.hset(keyName, field.toUpperCase(), value);
@@ -87,31 +67,6 @@ class SolProcessHelper {
     }
   }
 
-  // public async getLastBlockProcessed(blockNumber: number) {
-  //   try {
-  //     const getAsync = promisify(redisClient.get).bind(redisClient);
-  //     const value = await getAsync(config.LAST_BLOCK_NUMBER || "");
-  //     if (value) return parseInt(value);
-  //     redisClient.set(
-  //       config.LAST_BLOCK_NUMBER || "",
-  //       blockNumber.toString()
-  //     );
-  //   } catch (error: any) {
-  //     console.error('getLastBlockProcessed >>>', error);
-  //   }
-  // }
-
-  // public async updateLastBlockProcessed(lastBlockProcessed: number) {
-  //   try {
-  //     const updatedBlockNumber = ++lastBlockProcessed;
-  //     redisClient.set(
-  //       config.LAST_BLOCK_NUMBER || "",
-  //       updatedBlockNumber.toString()
-  //     );
-  //   } catch (error: any) {
-  //     console.error('updateLastBlockProcessed >>>>', error)
-  //   }
-  // }
   public async getHashTable(keyName: string) {
     try {
       const getAsync: any = promisify(redisClient.hvals).bind(redisClient)
@@ -198,37 +153,6 @@ class SolProcessHelper {
     }
   };
 
-  // public fetchERC721Tokens = async () => {
-  //   try {
-  //     const getTokenQuery = `SELECT * FROM coins WHERE coin_status=1 AND coin_family=${config.STATIC_COIN_FAMILY.ETH} AND (token_type!='${config.TOKEN_TYPE_ETH}' OR token_type is null)`;
-
-  //     const tokens: CoinInterface[] = await database.db_read.query(getTokenQuery, {
-  //       type: Sequelize.QueryTypes.SELECT,
-  //     });
-
-  //     redisClient.set(config.TOKEN_TYPE721_ETH, JSON.stringify(tokens));
-  //   } catch (error: any) {
-  //     console.error('fetchERC721Tokens >>>>', error);
-  //   }
-  // };
-
-  // public checkIfOurNFTContract = async (address: string) => {
-  //   try {
-  //     const getAsync = promisify(redisClient.get).bind(redisClient);
-  //     const value = await getAsync(config.TOKEN_TYPE721_ETH);
-  //     const erc721Tokens: CoinInterface[] = value ? JSON.parse(value) : [];
-  //     const token = erc721Tokens.find(
-  //       (el: any) => Number(el.is_token) === Number(BooleanEnum.true) && el.token_address.toUpperCase() === address?.toUpperCase()
-  //     );
-
-  //     if (token) return token;
-  //     return null;
-  //   } catch (error: any) {
-  //     console.error('checkIfOurNFTContract >>>>>', error);
-  //     return null;
-  //   }
-  // };
-
   public check_our_wallet_address = async (address: string) => {
     try {
       let wallet_data: any = await this.getKeyValuePair(config.SOL_WALLET_ADDRESS, address);
@@ -236,7 +160,6 @@ class SolProcessHelper {
         console.log("wallet_Data>>>>>>>>", wallet_data)
       }
       return JSON.parse(wallet_data);
-      // return address_data ? JSON.parse(address_data) : {};
     } catch (error: any) {
       console.error('check_our_wallet_address >>>>>', error);
       return null;

@@ -60,30 +60,6 @@ class Solana {
 		}
 	}
 
-	// public async getCRC20TokenBalance(walletAddress: string, tokenAddress: string): Promise<number> {
-	// 	try {
-	// 		const walletPublicKey = new PublicKey(walletAddress);
-	// 		const mintPublicKey = new PublicKey(tokenAddress);
-	// 		const tokenAccounts = await this.connectionNew.getTokenAccountsByOwner(walletPublicKey, {
-	// 			mint: mintPublicKey,
-	// 		});
-	// 		if (tokenAccounts.value?.length > 0) {
-	// 			const tokenAccount = tokenAccounts.value[0].account;
-	// 			const tokenAccountInfo = AccountLayout.decode(tokenAccount.data);
-	// 			const amount = tokenAccountInfo.amount;
-	// 			const mintInfo: any = await this.connectionNew.getParsedAccountInfo(mintPublicKey);
-	// 			const decimals = mintInfo.value.data.parsed.info.decimals;
-	// 			const balance = Number(amount) / (10 ** decimals);
-	// 			return balance;
-	// 		} else {
-	// 			return 0;
-	// 		}
-	// 	} catch (error: any) {
-	// 		console.log('🔥 ~ ~ getUserCRC20TokenBalance node.solana.helper.ts error', error);
-	// 		return 0;
-	// 	}
-	// }
-
 	public async getCRC20TokenBalance(walletAddress: string, tokenAddress: string): Promise<number> {
 		const fetchTokenAccountBalance = async (connection: any): Promise<number> => {
 			const walletPublicKey = new PublicKey(walletAddress);
@@ -137,12 +113,6 @@ class Solana {
 							coin.token_address ? coin.token_address : null/// contract_address
 						)
 						break;
-					// case TokenStandard.ERC721:
-					//     balance = await this.ERC721_Token_Fetch_Balance(
-					//         address, //// wallet_address
-					//         coin.token_address ? coin.token_address : null /// contract_address
-					//     )
-					//     break;
 					default:
 						balance = 0
 						break;

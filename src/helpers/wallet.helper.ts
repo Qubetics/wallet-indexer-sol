@@ -1,13 +1,10 @@
 import { config } from "../config";
 import kafkaHelper from "../config/kafka.helper";
-// import rabbitMq from "../config/rabbitMq";
 import { CoinFamilyEnum } from "../enum";
 import { CoinInterface, CoinsModel } from "../models";
 import WalletModel from "../models/tables/model.wallets";
-// import ethProcessHelper from "../processes/process.helper";
 import { Solana_Helper } from "./solana.helper";
 import { Utility_Helper } from "./utility.helper";
-// import utxo from "./utxo";
 
 class WalletHelper {
     public sol_pending_balance_update_topic = config.config.KAFKA_BALANCE.SOL_PENDING_BALANCE_UPDATE_TOPIC;
@@ -23,19 +20,6 @@ class WalletHelper {
                     case CoinFamilyEnum.SOL:
                         balance = await Solana_Helper.getBalance(address, coin);
                         break;
-                    // case CoinFamilyEnum.BNB:
-                    //     balance = await Blockchain_Helper.Fetch_Balance_bnb(address, coin);
-                    //     break;
-                    // case CoinFamilyEnum.BTC:
-                    //     balance = Number(await utxo.getUserBtcBalance(address));
-                    //     break;
-                    // case CoinFamilyEnum.LTC:
-                    //     balance = Number(await utxo.getUserLtcBalance(address));
-                    //     break;
-                    // case CoinFamilyEnum.TRON:
-                    //     balance = Number(await Blockchain_Helper.TRX_Fetch_Balance(address, coin))
-                    //     break;
-
                     default:
                         balance = 0;
                         break;
@@ -44,7 +28,6 @@ class WalletHelper {
             return balance !== null ? Number(await Utility_Helper.exponentialToDecimal(balance)) : null;
         } catch (error: any) {
             console.error(`WalletHelper Fetch_Balance error >>>`, error);
-            // return 0;
             return null;
         }
     }
@@ -88,16 +71,12 @@ class WalletHelper {
                 }
             }
             else {
-
-                //let queue = config.config.KAFKA_BALANCE.ETH_PENDING_BALANCE_UPDATE_TOPIC;
                 let data = {
                     coin_data: coin,
                     wallet_address: wallet_address,
                     queue_count: 0,
                 }
                 await kafkaHelper.produceMessage(this.sol_pending_balance_update_topic, data)
-                // await rabbitMq.assertQueue(queue);
-                // await rabbitMq.sendToQueue(queue, Buffer.from(JSON.stringify(data)));
             }
             return balance;
         } catch (error: any) {

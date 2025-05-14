@@ -38,7 +38,6 @@ class sol_block_process {
                     let updateBlockNo: number = blocks[blocks?.length - 1];
                     await solProcessHelper.updateLastBlockProcessed(updateBlockNo);
                 } else {
-                    // return console.log(LogsConstants.BLOCK_LIST_EMPTY);
                     console.log('💥 ~ readBlocks >>>')
                     for (let i: any = lastBlockProcessed; i <= latestBlock; i++) {
                         await this.addTxToQueue(i, this.sol_block_tx_topic);
