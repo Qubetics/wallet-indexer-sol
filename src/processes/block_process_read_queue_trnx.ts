@@ -66,6 +66,7 @@ class queue_transactions {
                 this.getTxFromBlock(JSON.parse(message.value.toString()));
             },
         });
+
     };
 
     public getTxFromBlock = async (blockId: number) => {
