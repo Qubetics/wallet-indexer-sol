@@ -2,7 +2,6 @@ import CoinsModel from './model.coins';
 import DeviceTokenModel from './model.deviceToken';
 import NotificationModel from './model.notifications';
 import TrnxHistoryModel from './model.trnxHistory';
-// import EthOldBLockModel from './model.eth_old_block';
 import SettingsModel from './model.settings';
 import CatchErrorMsgsModel from './model_catch_error_logs';
 import RewardHistoryModel from './model.reward_history';
@@ -16,7 +15,6 @@ export {
     DeviceTokenModel,
     NotificationModel,
     TrnxHistoryModel,
-    // EthOldBLockModel,
     SettingsModel,
     CatchErrorMsgsModel,
     RewardHistoryModel,

@@ -1,6 +1,5 @@
 import { config } from "../config";
 import kafkaHelper from "../config/kafka.helper";
-// import rabbitMq from "../config/rabbitMq";
 import { Wallet_Helper } from "../helpers";
 import { WalletModel } from "../models";
 
