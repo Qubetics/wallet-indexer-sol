@@ -1,11 +1,12 @@
 import { config } from "../config/config";
 import { BlockChainStatusEnum, BooleanEnum, CoinFamilyEnum, NotificationTypeEnum, TokenStandard, TrnxTypeEnum } from "../enum";
-import { NotificationInterface, TrnxHistoryModel } from "../models";
+import { CoinsModel, NotificationInterface, TrnxHistoryModel } from "../models";
 import { Utility_Helper, Wallet_Helper, Db_Helper, Solana_Helper } from "../helpers";
 import { Op } from "sequelize";
 import { global_helper } from "../helpers/global_helper";
 import kafkaHelper from "../config/kafka.helper";
 import solProcessHelper from "./process.helper";
+import { pending_trnx } from "../interfaces/global_helper";
 class SolTxStatusUpdateProcess {
 
   public startTxStatusUpdateQueue = async () => {
@@ -22,13 +23,18 @@ class SolTxStatusUpdateProcess {
     });
   };
 
-  public getTx = async (data: { tx_id: string; coin_id: number }) => {
+  public getTx = async (data: pending_trnx) => {
     try {
       const transaction = await this.getTransaction(data.tx_id);
       if (transaction) {
         if (transaction.meta.err == null) {
           const txUpdate: any = {
-            coin_id: data.coin_id,
+            coin: {
+              coin_id: data.coin_id,
+              is_token: data.is_token,
+              token_type: data.token_type,
+              token_address: data.token_address,
+            },
             status: "success",
             txid: transaction.transaction.signatures[0],
             fromAddress: transaction.transaction.message.accountKeys[0],
@@ -40,7 +46,12 @@ class SolTxStatusUpdateProcess {
           await this.sendTxUpdate(txUpdate);
         } else {
           const txUpdate: any = {
-            coin_id: data.coin_id,
+            coin: {
+              coin_id: data.coin_id,
+              is_token: data.is_token,
+              token_type: data.token_type,
+              token_address: data.token_address,
+            },
             status: "failed",
             txid: transaction.transaction.signatures[0],
             fromAddress: transaction.transaction.message.accountKeys[0],
@@ -80,7 +91,12 @@ class SolTxStatusUpdateProcess {
     }
   };
   public sendTxUpdate = async (txData: {
-    coin_id: number;
+    coin: {
+      coin_id: number,
+      is_token: boolean,
+      token_type: string | null,
+      token_address: string
+    };
     status: string;
     txid: string;
     gasReverted: number | undefined;
@@ -88,17 +104,26 @@ class SolTxStatusUpdateProcess {
     tx_fee: number
   }) => {
     try {
-      let coin_data: any = await solProcessHelper.CoinByCoinId(txData.coin_id);
+      let coin_data: any = {};
+      if (!txData.coin?.is_token) {
+        console.log('in case of coin');
+        coin_data = await solProcessHelper.checkIfContract('NativeCoin');
+      } else if (txData.coin?.token_type == TokenStandard.SPL) {
+        coin_data = await solProcessHelper.checkIfContract(txData.coin.token_address);
+      }
+      //let coin_data: any = await CoinsModel.findOne({ attributes: ['is_token', 'token_type', 'coin_symbol', 'coin_family', 'cmc_id', 'coin_symbol', 'added_by'], where: { coin_id: txData.coin_id } });
+
+      // let coin_data: any = await solProcessHelper.CoinByCoinId(txData.coin_id);
       if (coin_data) {
         const trx_data = {
-          coin_id: txData?.coin_id,
+          coin_id: txData?.coin.coin_id,
           status: txData?.status,
           txid: txData?.txid,
           gas_reverted: txData?.gasReverted,
           tx_fee: txData?.tx_fee,
           fromAddress: txData?.fromAddress,
           coin: {
-            coin_id: txData?.coin_id,
+            coin_id: txData?.coin.coin_id,
             is_token: coin_data.is_token,
             token_type: coin_data.token_type,
             coin_symbol: coin_data.coin_symbol,
@@ -135,7 +160,7 @@ class SolTxStatusUpdateProcess {
       let to_address = txnData.to_adrs;
       let tx_type = txnData?.type
       let coin_symbol = trx_data?.coin?.coin_symbol
-      let coin_family = txnData.coin_family;
+      // let coin_family = txnData.coin_family;
 
       //Update transaction status
       let txUpdateRes = await TrnxHistoryModel.update({ blockchain_status: status_tx, tx_fee: trx_data.tx_fee, gas_reverted: trx_data.gas_reverted }, { where: { id: tx_row_id } })
@@ -145,7 +170,7 @@ class SolTxStatusUpdateProcess {
           let AddressWithdraw: any = await solProcessHelper.check_our_wallet_address(from_address);
           if (AddressWithdraw) {
             /** update withdraw user eth balance */
-            const native_coin: any = await solProcessHelper.NativeCoinByCoinFamily(coin_family);
+            const native_coin: any = await solProcessHelper.checkIfContract('NativeCoin');
             await Wallet_Helper.Update_Balance(from_address, native_coin);
             if (trx_data?.coin?.is_token === BooleanEnum.true && trx_data.coin?.token_type.toLowerCase() === TokenStandard.SPL.toLowerCase()) {
               /** Update User ERC20 Token Balance */

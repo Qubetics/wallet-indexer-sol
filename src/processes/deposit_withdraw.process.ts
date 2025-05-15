@@ -53,7 +53,7 @@ class SolDepositWithdrawProcess {
       } else if (data.isNFTToken) {
         coin_data = data.isNFTToken;
       } else {
-        coin_data = await solProcessHelper.NativeCoinByCoinFamily(CoinFamilyEnum.SOL);
+        coin_data = await solProcessHelper.checkIfContract('NativeCoin');
         finalamount = await Utility_Helper.bigNumberSafeMath(data.amount, "/", Math.pow(10, 9));
       }
       const webhookTx: WebHookTxType = {
@@ -228,7 +228,7 @@ class SolDepositWithdrawProcess {
         );
         if (coin.is_token) {
           const native_coin: any =
-            await solProcessHelper.NativeCoinByCoinFamily(coin.coin_family);
+            await solProcessHelper.checkIfContract('NativeCoin');
           await Wallet_Helper.Update_Balance(
             from_address, /// wallet_address,
             native_coin /// coin
