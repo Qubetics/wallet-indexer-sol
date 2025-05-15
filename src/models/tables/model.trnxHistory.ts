@@ -1,6 +1,7 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import { ITrnxHistoryInterface } from "../interfaces/interface.trnxHistory";
 import db from "../../config/db";
+import CoinsModel from "./model.coins";
 
 
 interface TrnxHistoryCreationModel extends Optional<ITrnxHistoryInterface, "id"> { }
