@@ -123,6 +123,6 @@ const TrnxHistoryModel = db.db_write.define<TrnxHistoryInstance>(
     dataObj,
     dataObjIndex
 );
-
+TrnxHistoryModel.belongsTo(CoinsModel, { foreignKey: 'coin_id', targetKey: 'coin_id', as: "coin_data" });
 
 export default TrnxHistoryModel;
