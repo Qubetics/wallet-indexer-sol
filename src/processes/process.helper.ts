@@ -26,6 +26,22 @@ class SolProcessHelper {
       return null;
     }
   }
+
+  public async getMultipleKeyValuePairs(keyName: string, fields: string[]) {
+    try {
+      const upperFields = fields.map(f => f.toUpperCase());
+      return new Promise((resolve, reject) => {
+        redisClient.hmget(keyName, ...upperFields, (err, results) => {
+          if (err) reject(err);
+          else resolve(results);
+        });
+      });
+    } catch (err: any) {
+      console.error('getMultipleKeyValuePairs >>>>', err);
+      return null;
+    }
+  }
+
   public updateLastBlockProcessed = async (lastBlockProcessed: number) => {
     try {
       const updatedBlockNumber = ++lastBlockProcessed;
@@ -91,7 +107,19 @@ class SolProcessHelper {
     }
   }
 
-
+  public async getMultipleKeys(keys: string[]) {
+    try {
+      return new Promise((resolve, reject) => {
+        redisClient.mget(keys, (err, results) => {
+          if (err) reject(err);
+          else resolve(results);
+        });
+      });
+    } catch (err: any) {
+      console.error('getMultipleKeys >>>>', err);
+      return null;
+    }
+  }
 
   public fetchSPLTokens = async () => {
     try {

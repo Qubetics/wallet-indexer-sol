@@ -1,7 +1,7 @@
 import { TxType, WebHookTxType } from "../types/ERC20Tokens.types";
 import { CoinInterface, NotificationInterface, TrnxHistoryModel } from "../models";
 import { config } from "../config/config";
-import { BlockChainStatusEnum, CoinFamilyEnum, NotificationTypeEnum, TrnxTypeEnum, TxReqTypesEnum } from "../enum";
+import { BlockChainStatusEnum, TrnxTypeEnum, TxReqTypesEnum } from "../enum";
 import { Utility_Helper, Wallet_Helper } from "../helpers"
 import { Op } from "sequelize";
 import { global_helper } from "../helpers/global_helper";
@@ -44,7 +44,7 @@ class SolDepositWithdrawProcess {
     if (data.amount == 0) {
       console.log("amount === 0")
     } else {
-      console.log("amount is more than 0", data)
+      // console.log("amount is more than 0", data)
       let coin_data: any = null;
       let finalamount: any = 0;
       if (data.token) {
