@@ -313,10 +313,10 @@ class queue_transactions {
                                     const results = await solProcessHelper.getMultipleKeyValuePairs(`${config.SOL_WALLET_ADDRESS}`, addresses);
                                     if (results) {
                                         const [withdrawTx, depositTx] = results as string[];
-                                        if (withdrawTx) {
-                                            txData.txType = TrnxTypeEnum.WITHDRAW;
-                                        } else if (depositTx) {
+                                        if (depositTx) {
                                             txData.txType = TrnxTypeEnum.DEPOSIT;
+                                        } else if (withdrawTx) {
+                                            txData.txType = TrnxTypeEnum.WITHDRAW;
                                         }
                                     }
                                 }
@@ -349,7 +349,7 @@ class queue_transactions {
                         if (delta !== 0) {
                             solDelta.push({
                                 address: accountKeys[i]?.pubkey || accountKeys[i],
-                                change: delta / 1e9 // lamports to SOL
+                                change: delta
                             });
                         }
                     }
@@ -403,10 +403,10 @@ class queue_transactions {
                                         const results = await solProcessHelper.getMultipleKeyValuePairs(`${config.SOL_WALLET_ADDRESS}`, addresses);
                                         if (results) {
                                             const [withdrawTx, depositTx] = results as string[];
-                                            if (withdrawTx) {
-                                                txData.txType = TrnxTypeEnum.WITHDRAW;
-                                            } else if (depositTx) {
+                                            if (depositTx) {
                                                 txData.txType = TrnxTypeEnum.DEPOSIT;
+                                            } else if (withdrawTx) {
+                                                txData.txType = TrnxTypeEnum.WITHDRAW;
                                             }
                                         }
                                     }
