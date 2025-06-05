@@ -14,37 +14,70 @@ class Solana {
 		this.connectionPublic = new Connection("https://api.mainnet-beta.solana.com");
 	}
 
-	public rpcCall = async (body: {}) => {
-		try {
-			const options = { headers: { "Content-Type": "application/json" } };
-			const response = await axios.post(`${config.config.NODE.SOL_RPC_URL}`, body, options);
-
-			if (response.status === 200) {
-				return response.data.result;
-			} else {
-				console.log('🔥 ~ rpcCall response status error');
-				throw new Error('Non-200 response status');
-			}
-		} catch (error: any) {
-			console.log('🔥 ~ rpcCall web3.helper.ts error', error);
-
-			// Check if the error is an AxiosError and handle accordingly
-			if (axios.isAxiosError(error)) {
-				if (error.response) {
-					// Server responded with a status other than 200 range
-					return `Error: ${error.response.status} - ${error.response.statusText}`;
-				} else if (error.request) {
-					// Request was made but no response was received
-					return 'Error: No response received from server';
-				} else {
-					// Something happened in setting up the request
-					return `Error: ${error.message}`;
+	private async retryWithBackoff(fn: () => Promise<any>, maxRetries = 5, initialDelay = 1000) {
+		let retries = 0;
+		while (retries < maxRetries) {
+			try {
+				return await fn();
+			} catch (error: any) {
+				retries++;
+				if (retries === maxRetries) {
+					throw error;
 				}
-			} else {
-				// Handle other types of errors
-				return `Error: ${error.message}`;
+
+				// Check if it's a connection error that we should retry
+				const shouldRetry = error.code === 'ECONNRESET' ||
+					error.code === 'ETIMEDOUT' ||
+					error.code === 'ECONNREFUSED' ||
+					error.message?.includes('timeout');
+
+				if (!shouldRetry) {
+					throw error;
+				}
+
+				const delay = initialDelay * Math.pow(2, retries - 1);
+				console.log(`RPC call failed, retrying in ${delay}ms... (Attempt ${retries}/${maxRetries})`);
+				await new Promise(resolve => setTimeout(resolve, delay));
 			}
 		}
+	}
+
+	public rpcCall = async (body: {}) => {
+		return this.retryWithBackoff(async () => {
+			try {
+				const options = {
+					headers: { "Content-Type": "application/json" },
+					timeout: 30000 // 30 second timeout
+				};
+				const response = await axios.post(`${config.config.NODE.SOL_RPC_URL}`, body, options);
+
+				if (response.status === 200) {
+					return response.data.result;
+				} else {
+					console.log('🔥 ~ rpcCall response status error');
+					throw new Error('Non-200 response status');
+				}
+			} catch (error: any) {
+				console.log('🔥 ~ rpcCall web3.helper.ts error', error);
+
+				// Check if the error is an AxiosError and handle accordingly
+				if (axios.isAxiosError(error)) {
+					if (error.response) {
+						// Server responded with a status other than 200 range
+						throw new Error(`Error: ${error.response.status} - ${error.response.statusText}`);
+					} else if (error.request) {
+						// Request was made but no response was received
+						throw new Error('Error: No response received from server');
+					} else {
+						// Something happened in setting up the request
+						throw new Error(`Error: ${error.message}`);
+					}
+				} else {
+					// Handle other types of errors
+					throw new Error(`Error: ${error.message}`);
+				}
+			}
+		});
 	};
 
 	public async getSolanaBalance(wallet: string, inSolana: boolean): Promise<string | number> {
