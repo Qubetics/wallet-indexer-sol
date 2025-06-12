@@ -19,7 +19,7 @@ class sol_block_process {
             const lastBlockToProcess = latestBlock - this.minBlockConfirmation;
             console.log('lastBlockToProcess >>>', lastBlockToProcess);
 
-            let lastBlockProcessed = await solProcessHelper.getLastBlockProcessed(latestBlock);
+            let lastBlockProcessed = await solProcessHelper.getLastBlockProcessed(lastBlockToProcess);
             if (!lastBlockProcessed) {
                 return console.log('No block present in redis');
             }
@@ -30,7 +30,9 @@ class sol_block_process {
                 BLOCK_DIFFERENCE: latestBlock - lastBlockProcessed,
             });
             if (lastBlockProcessed <= lastBlockToProcess) {
-                let blocks = await this.getBlocks(lastBlockProcessed, latestBlock);
+                let blocks = await this.getBlocks(lastBlockProcessed, lastBlockToProcess);
+                // console.log('blocks 222>>>', blocks);
+
                 if (blocks && blocks?.length > 0) {
                     for await (let block of blocks) {
                         await this.addTxToQueue(block, this.sol_block_tx_topic);
