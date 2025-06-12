@@ -12,7 +12,7 @@ class ETHStartProcess {
     // this.testing_node()
   }
   public read_block_process() {
-    schedule.scheduleJob("*/5 * * * * *", async function () {
+    schedule.scheduleJob("*/3 * * * * *", async function () {
       await sol_blocks_process.readBlocks();
     });
   }
