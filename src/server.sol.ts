@@ -9,6 +9,7 @@ class ETHStartProcess {
     this.getPendingWithdrawalTxProcess();
     this.updateTxStatusProcess();
     this.SolUpdateBalance();
+    this.SolUpdateBalanceByWallet();
     // this.testing_node()
   }
   public read_block_process() {
@@ -50,6 +51,11 @@ class ETHStartProcess {
     setTimeout(async () => {
       await sol_update_balance_controller.update_wallet_balance();
     }, 10000);
+  }
+  public async SolUpdateBalanceByWallet() {
+    schedule.scheduleJob("*/5 * * * *", async function () {
+      await sol_update_balance_controller.updateWalletBalanceByWallet();
+    });
   }
 }
 

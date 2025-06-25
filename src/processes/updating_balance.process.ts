@@ -1,7 +1,9 @@
 import { config } from "../config";
 import kafkaHelper from "../config/kafka.helper";
+import { CoinFamilyEnum } from "../enum";
 import { Wallet_Helper } from "../helpers";
-import { WalletModel } from "../models";
+import { CoinsModel, WalletModel } from "../models";
+import solProcessHelper from "./process.helper";
 
 class solUpdateBalanceController {
     public sol_pending_balance_update_group_id = config.config.KAFKA_BALANCE.SOL_PENDING_BALANCE_UPDATE_GROUP_ID;
@@ -51,7 +53,61 @@ class solUpdateBalanceController {
         }
     }
 
+    public updateWalletBalanceByWallet = async () => {
+       try{
+            let coin_limit_count = 0;
+            const limit = 50;
+            const findCoinCounter = await solProcessHelper.getKeyValuePair(config.config.REDISKEYS.ALL_PROCESSES, 'WalletCount')
+            console.log("🚀 ~ solUpdateBalanceController ~ publicupdateWalletBalanceByWal ~ findCoinCounter:", findCoinCounter)
 
+            if (findCoinCounter) {
+                coin_limit_count = Number(findCoinCounter);
+            }
+            console.log("🚀 ~ solUpdateBalanceController ~ publicupdateWalletBalanceByWal ~ coin_limit_count:", coin_limit_count)
+            const wallets = await WalletModel.findAll({
+                where: {
+                  coin_family: CoinFamilyEnum.SOL
+                },
+                include: [
+                  {
+                    model: CoinsModel,
+                    as: 'coin_data'
+                  }
+                ],
+                limit,
+                offset: coin_limit_count,
+                raw: true,
+                nest: true
+              });
+            if(!wallets) {
+                await solProcessHelper.setKeyValuePair(config.config.REDISKEYS.ALL_PROCESSES, 'WalletCount', '0')
+            }
+            if (wallets.length > 0) {
+
+                for(const wallet of wallets)
+                {
+                    const coin_data = wallet;
+                    if(!coin_data) return false;
+                    const payload = {
+                        coin_data: coin_data,
+                        wallet_address: wallet.wallet_address,
+                        queue_count: 0,
+                    };
+                    await kafkaHelper.produceMessage(this.sol_pending_balance_update_topic, payload);
+                }
+            }
+            if (wallets.length < limit) {
+                await solProcessHelper.setKeyValuePair(config.config.REDISKEYS.ALL_PROCESSES, 'WalletCount', '0')
+            } else {
+                coin_limit_count += limit;
+                await solProcessHelper.setKeyValuePair(config.config.REDISKEYS.ALL_PROCESSES, 'WalletCount', coin_limit_count.toString())
+            }
+            console.log("\nEND")
+              return true;
+        } catch (err: any) {
+            console.error("Error in updateWalletBalanceByWallet", err)
+        }
+    };
 
 }
 
