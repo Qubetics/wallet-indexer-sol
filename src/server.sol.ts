@@ -9,7 +9,7 @@ class ETHStartProcess {
     this.getPendingWithdrawalTxProcess();
     this.updateTxStatusProcess();
     this.SolUpdateBalance();
-    this.SolUpdateBalanceByWallet();
+    // this.SolUpdateBalanceByWallet();
     // this.testing_node()
   }
   public read_block_process() {
