@@ -222,13 +222,13 @@ class queue_transactions {
                 console.log('blockInfo >>>', blockInfo)
                 console.log(`💥 ~ do not get the block info`, `Block Number`, blockId);
                 // Add delay before returning on error
-                await this.sleep(1000);
+                // await this.sleep(1000);
                 return;
             }
             // Add small delay between processing large blocks
-            if (blockInfo?.transactions?.length > 100) {
-                await this.sleep(200);
-            }
+            // if (blockInfo?.transactions?.length > 100) {
+            //     await this.sleep(200);
+            // }
             // console.log('blockInfo >>>', blockInfo);
             if (blockInfo && blockInfo?.transactions && blockInfo?.transactions?.length > 0) {
                 for await (let trnxData of blockInfo.transactions) {
