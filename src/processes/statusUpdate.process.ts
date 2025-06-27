@@ -81,9 +81,15 @@ class SolTxStatusUpdateProcess {
       return await Solana_Helper
         .rpcCall(rpcJson)
         .then((result) => { return result; })
-        .catch((err) => {
+        .catch(async(err) => {
           console.log("💥 ~ ~ getTransaction solWeb3.rpcCall error", err);
-          return false;
+            return await Solana_Helper
+              .rpcCallPublicNode(rpcJson)
+              .then((result) => { return result; })
+              .catch((err) => {
+                console.log("💥 ~ ~ getTransaction solWeb3.rpcCallPublicNode error", err);
+                return false;
+              });
         });
     } catch (error: any) {
       console.log("🔥 ~ ~ getTransaction error", error);
