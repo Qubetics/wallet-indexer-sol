@@ -62,10 +62,16 @@ class sol_block_process {
                 .then((result) => {
                     return result;
                 })
-                .catch((err) => {
-                    console.error('🔥 ~ ~ getCurrentBlock solWeb3.rpcCall error', err);
-                    return false;
-                });
+                .catch(async(err) => {
+                    console.log("💥 ~ ~ getCurrentBlock solWeb3.rpcCall error", err?.message || err);
+                      return await Solana_Helper
+                        .rpcCallPublicNode(rpcJson)
+                        .then((result) => { return result; })
+                        .catch((err) => {
+                            console.error('🔥 ~ ~ getCurrentBlock rpcCallPublicNode solWeb3.rpcCall error', err?.message || err);
+                            return false;
+                        });
+                  });
         } catch (error: any) {
             console.error('🔥 ~ ~ getCurrentBlock error', error);
             return error.message;
@@ -85,10 +91,20 @@ class sol_block_process {
                 .then((result) => {
                     return result;
                 })
-                .catch((error) => {
-                    console.log("🔥 ~ ~ getBlocks solWeb3.rpcCall error", error);
-                    return false;
-                });
+                .catch(async(err) => {
+                    console.log("💥 ~ ~ getBlocks solWeb3.rpcCall error", err?.message || err);
+                      return await Solana_Helper
+                        .rpcCallPublicNode(rpcJson)
+                        .then((result) => { return result; })
+                        .catch((err) => {
+                          console.log("💥 ~ ~ getBlocks solWeb3.rpcCallPublicNode error", err?.message || err);
+                          return false;
+                        });
+                  });
+                // .catch((error) => {
+                //     console.log("🔥 ~ ~ getBlocks solWeb3.rpcCall error", error);
+                //     return false;
+                // });
         } catch (error: any) {
             console.log("🔥 ~ ~ getBlocks error", error);
             return false;

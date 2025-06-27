@@ -3,6 +3,7 @@ import { config } from "../config/index";
 import { AccountLayout } from "@solana/spl-token";
 import { PublicKey, Connection } from "@solana/web3.js"
 import { BooleanEnum, TokenStandard } from "../enum";
+import { SolanaRpcNodes } from "../constants/public_nodes";
 
 class Solana {
 	public connection: Connection;
@@ -58,7 +59,7 @@ class Solana {
 					throw new Error('Non-200 response status');
 				}
 			} catch (error: any) {
-				console.log('🔥 ~ rpcCall web3.helper.ts error', error);
+				console.log('🔥 ~ rpcCall web3.helper.ts error', error?.message || error);
 
 				// Check if the error is an AxiosError and handle accordingly
 				if (axios.isAxiosError(error)) {
@@ -81,46 +82,41 @@ class Solana {
 	};
 
 	public rpcCallPublicNode = async (body: {}) => {
-		return this.retryWithBackoff(async () => {
-			try {
-				const options = {
-					headers: { "Content-Type": "application/json" },
-					timeout: 30000 // 30 second timeout
-				};
-				const response = await axios.post(`https://solana-rpc.publicnode.com`, body, options);
-
-				if (response.status === 200) {
-					return response.data.result;
-				} else {
-					console.log('🔥 ~ rpcCall response status error');
-					throw new Error('Non-200 response status');
-				}
-			} catch (error: any) {
-				console.log('🔥 ~ rpcCall web3.helper.ts error', error);
-
-				// Check if the error is an AxiosError and handle accordingly
-				if (axios.isAxiosError(error)) {
-					if (error.response) {
-						// Server responded with a status other than 200 range
-						throw new Error(`Error: ${error.response.status} - ${error.response.statusText}`);
-					} else if (error.request) {
-						// Request was made but no response was received
-						throw new Error('Error: No response received from server');
-					} else {
-						// Something happened in setting up the request
-						throw new Error(`Error: ${error.message}`);
-					}
-				} else {
-					// Handle other types of errors
-					throw new Error(`Error: ${error.message}`);
-				}
-			}
-		});
+		for (const nodeUrl of SolanaRpcNodes) {
+		  try {
+			const result = await this.retryWithBackoff(async () => {
+			  const options = {
+				headers: { "Content-Type": "application/json" },
+				timeout: 30000
+			  };
+			  const response = await axios.post(nodeUrl, body, options);
+			  if (response.status === 200) {
+				return response.data.result;
+			  } else {
+				console.log(`🔥 ~ rpcCall error: Non-200 status from ${nodeUrl}`);
+				throw new Error(`Non-200 response status from ${nodeUrl}`);
+			  }
+			});
+	  
+			return result;
+	  
+		  } catch (error: any) {
+			console.log(`⚠️ Node failed: ${nodeUrl} — ${error.message}`);
+		  }
+		}
+	  
+		throw new Error("All Solana RPC nodes failed.");
 	};
 
 	public async getSolanaBalance(wallet: string, inSolana: boolean): Promise<string | number> {
 		try {
 			let balanceInWei = await this.connection.getBalance(new PublicKey(wallet));
+			if (balanceInWei === 0) {
+				balanceInWei = await this.connectionNew.getBalance(new PublicKey(wallet));
+			}
+			if (balanceInWei === 0) {
+				balanceInWei = await this.connectionPublic.getBalance(new PublicKey(wallet));
+			}
 			if (inSolana == true) {
 				return Number(balanceInWei / 1000000000);
 			}
