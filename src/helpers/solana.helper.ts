@@ -91,7 +91,7 @@ class Solana {
 					};
 					const response = await axios.post(nodeUrl, body, options);
 					if (response.status === 200) {
-						console.log('response.data.result >>', response.data.result);
+						// console.log('response.data.result >>', response.data.result);
 						return response.data.result;
 					} else {
 						console.log(`🔥 ~ rpcCall error: Non-200 status from ${nodeUrl}`);
