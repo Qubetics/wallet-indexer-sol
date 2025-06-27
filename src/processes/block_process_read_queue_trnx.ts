@@ -507,9 +507,16 @@ class queue_transactions {
                 .then((result) => {
                     return result;
                 })
-                .catch((error) => {
+                .catch(async (error) => {
                     console.log("🔥 ~ ~ getBlockTransactions rpcCall error", error);
-                    return false;
+                    return await Solana_Helper
+                        .rpcCallPublicNode(rpcJson)
+                        .then((result) => { return result; })
+                        .catch((err) => {
+                            console.log("💥 ~ ~ getBlockTransactions Solana_Helper.rpcCallPublicNode error", err?.message || err);
+                            return false;
+                        });
+                    // return false;
                 });
         } catch (err: any) {
             console.log("🔥 ~ ~ getBlockTransactions error", err);

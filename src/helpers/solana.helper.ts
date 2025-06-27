@@ -83,28 +83,29 @@ class Solana {
 
 	public rpcCallPublicNode = async (body: {}) => {
 		for (const nodeUrl of SolanaRpcNodes) {
-		  try {
-			const result = await this.retryWithBackoff(async () => {
-			  const options = {
-				headers: { "Content-Type": "application/json" },
-				timeout: 30000
-			  };
-			  const response = await axios.post(nodeUrl, body, options);
-			  if (response.status === 200) {
-				return response.data.result;
-			  } else {
-				console.log(`🔥 ~ rpcCall error: Non-200 status from ${nodeUrl}`);
-				throw new Error(`Non-200 response status from ${nodeUrl}`);
-			  }
-			});
-	  
-			return result;
-	  
-		  } catch (error: any) {
-			console.log(`⚠️ Node failed: ${nodeUrl} — ${error.message}`);
-		  }
+			try {
+				const result = await this.retryWithBackoff(async () => {
+					const options = {
+						headers: { "Content-Type": "application/json" },
+						timeout: 30000
+					};
+					const response = await axios.post(nodeUrl, body, options);
+					if (response.status === 200) {
+						console.log('response.data.result >>', response.data.result);
+						return response.data.result;
+					} else {
+						console.log(`🔥 ~ rpcCall error: Non-200 status from ${nodeUrl}`);
+						throw new Error(`Non-200 response status from ${nodeUrl}`);
+					}
+				});
+
+				return result;
+
+			} catch (error: any) {
+				console.log(`⚠️ Node failed: ${nodeUrl} — ${error.message}`);
+			}
 		}
-	  
+
 		throw new Error("All Solana RPC nodes failed.");
 	};
 
