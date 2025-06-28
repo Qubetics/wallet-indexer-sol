@@ -1,7 +1,9 @@
+import kafkaHelper from "./config/kafka.helper";
 import { solWithdrawDepositProcess, solPendingWithdrawalProcess, solTxStatusUpdateProcess, sol_blocks_process, sol_tx_status_deposit_withdraw, sol_update_balance_controller } from "./processes/index.process"
 import schedule from "node-schedule";
 class ETHStartProcess {
   constructor() {
+    // kafkaHelper.connect();
     this.read_block_process();
     this.readSpecificBlock();
     this.consume_read_block_queue();
@@ -9,8 +11,12 @@ class ETHStartProcess {
     this.getPendingWithdrawalTxProcess();
     this.updateTxStatusProcess();
     this.SolUpdateBalance();
+    this.connectKafka();
     // this.SolUpdateBalanceByWallet();
     // this.testing_node()
+  }
+  public async connectKafka() {
+    await kafkaHelper.connect();
   }
   public read_block_process() {
     schedule.scheduleJob("*/5 * * * * *", async function () {
