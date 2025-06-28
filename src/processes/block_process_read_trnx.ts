@@ -43,12 +43,15 @@ class sol_block_process {
                     for await (let block of blocks) {
                         await this.addTxToQueue(block, this.sol_block_tx_topic);
 
-                        // ✅ Adaptive delay based on block count
-                        const delay = this.calculateQueueDelay(blocks.length);
-                        if (delay > 0) {
-                            // console.log(`⏳ Queue delay: ${delay}ms (${blocks.length} blocks remaining)`);
-                            await this.sleep(delay);
+                        if (latestBlock - lastBlockProcessed < 60) {
+                            // ✅ Adaptive delay based on block count
+                            const delay = this.calculateQueueDelay(blocks.length);
+                            if (delay > 0) {
+                                // console.log(`⏳ Queue delay: ${delay}ms (${blocks.length} blocks remaining)`);
+                                await this.sleep(delay);
+                            }
                         }
+
                     }
                     let updateBlockNo: number = blocks[blocks?.length - 1];
                     await solProcessHelper.updateLastBlockProcessed(updateBlockNo);
