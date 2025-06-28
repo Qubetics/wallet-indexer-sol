@@ -12,7 +12,7 @@ class ETHStartProcess {
     this.updateTxStatusProcess();
     this.SolUpdateBalance();
     this.connectKafka();
-    // this.SolUpdateBalanceByWallet();
+    this.SolUpdateBalanceByWallet();
     // this.testing_node()
   }
   public async connectKafka() {
