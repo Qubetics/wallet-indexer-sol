@@ -26,8 +26,11 @@ class solUpdateBalanceController {
     public updateBalance = async (data: any) => {
         try {
             if (data.queue_count < 10) {
+                // console.log('data.coin_data >>>', data.coin_data);
+                // console.log('data.wallet_address >>>', data.wallet_address);
 
                 let balance: any = await Wallet_Helper.Fetch_Balance(data.wallet_address, data.coin_data);
+                // console.log('balance >>>', balance);
                 if (balance !== null) {
                     await WalletModel.update(
                         { balance: Number(balance) },
@@ -54,7 +57,7 @@ class solUpdateBalanceController {
     }
 
     public updateWalletBalanceByWallet = async () => {
-       try{
+        try {
             let coin_limit_count = 0;
             const limit = 50;
             const findCoinCounter = await solProcessHelper.getKeyValuePair(config.config.REDISKEYS.ALL_PROCESSES, 'WalletCount')
@@ -64,35 +67,36 @@ class solUpdateBalanceController {
                 coin_limit_count = Number(findCoinCounter);
             }
             console.log("🚀 ~ solUpdateBalanceController ~ publicupdateWalletBalanceByWal ~ coin_limit_count:", coin_limit_count)
-            const wallets = await WalletModel.findAll({
+            const wallets: any = await WalletModel.findAll({
                 where: {
-                  coin_family: CoinFamilyEnum.SOL
+                    coin_family: CoinFamilyEnum.SOL
                 },
                 include: [
-                  {
-                    model: CoinsModel,
-                    as: 'coin_data'
-                  }
+                    {
+                        model: CoinsModel,
+                        as: 'coin_data'
+                    }
                 ],
                 limit,
                 offset: coin_limit_count,
-                raw: true,
+                // raw: true,
                 nest: true
-              });
-            if(!wallets) {
+            });
+            if (!wallets) {
                 await solProcessHelper.setKeyValuePair(config.config.REDISKEYS.ALL_PROCESSES, 'WalletCount', '0')
             }
             if (wallets.length > 0) {
 
-                for(const wallet of wallets)
-                {
-                    const coin_data = wallet;
-                    if(!coin_data) return false;
+                for (const wallet of wallets) {
+                    const coin_data = wallet.coin_data;
+                    // console.log('coin_data >>>', coin_data);
+                    if (!coin_data) return false;
                     const payload = {
                         coin_data: coin_data,
                         wallet_address: wallet.wallet_address,
                         queue_count: 0,
                     };
+                    // console.log('payload >>>', payload);
                     await kafkaHelper.produceMessage(this.sol_pending_balance_update_topic, payload);
                 }
             }
@@ -103,7 +107,7 @@ class solUpdateBalanceController {
                 await solProcessHelper.setKeyValuePair(config.config.REDISKEYS.ALL_PROCESSES, 'WalletCount', coin_limit_count.toString())
             }
             console.log("\nEND")
-              return true;
+            return true;
         } catch (err: any) {
             console.error("Error in updateWalletBalanceByWallet", err)
         }
