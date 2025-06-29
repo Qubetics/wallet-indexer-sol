@@ -7,12 +7,13 @@ class ETHStartProcess {
     this.read_block_process();
     this.readSpecificBlock();
     this.consume_read_block_queue();
+    this.consume_read_block_queueB();
     this.solWithdrawDepositProcess();
     this.getPendingWithdrawalTxProcess();
     this.updateTxStatusProcess();
     this.SolUpdateBalance();
     this.connectKafka();
-    this.SolUpdateBalanceByWallet();
+    // this.SolUpdateBalanceByWallet();
     // this.testing_node()
   }
   public async connectKafka() {
@@ -36,6 +37,11 @@ class ETHStartProcess {
   public consume_read_block_queue() {
     setTimeout(async () => {
       await sol_tx_status_deposit_withdraw.startBlockTransactionQueue();
+    }, 10000);
+  }
+  public consume_read_block_queueB() {
+    setTimeout(async () => {
+      await sol_tx_status_deposit_withdraw.startBlockTransactionQueueB();
     }, 10000);
   }
   public async solWithdrawDepositProcess() {

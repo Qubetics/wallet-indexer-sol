@@ -35,7 +35,11 @@ class sol_block_process {
 
                 if (blocks && blocks?.length > 0) {
                     for await (let block of blocks) {
-                        await this.addTxToQueue(block, this.sol_block_tx_topic);
+                        if (block % 2 === 0) {
+                            await this.addTxToQueue(block, `${this.sol_block_tx_topic}_a`);
+                        } else {
+                            await this.addTxToQueue(block, `${this.sol_block_tx_topic}_b`);
+                        }
                     }
                     let updateBlockNo: number = blocks[blocks?.length - 1];
                     await solProcessHelper.updateLastBlockProcessed(updateBlockNo);

@@ -30,7 +30,7 @@ class queue_transactions {
                 }
 
                 consumer = await kafkaHelper.kafka.consumer({
-                    groupId: `${this.sol_block_tx_group_id}`,
+                    groupId: `${this.sol_block_tx_group_id}_a`,
                     // Add session timeout for better error handling
                     sessionTimeout: 30000,
                     // Add heartbeat interval
@@ -38,7 +38,7 @@ class queue_transactions {
                 });
 
                 await consumer.subscribe({
-                    topic: `${this.sol_block_tx_topic}`,
+                    topic: `${this.sol_block_tx_topic}_a`,
                     fromBeginning: false, // ✅ Changed to false to prevent reprocessing
                 });
 
@@ -61,6 +61,97 @@ class queue_transactions {
 
                             const messageTime = Date.now() - messageStartTime;
                             console.log(`✅ Message processed successfully in ${messageTime}ms`);
+
+                        } catch (error) {
+                            const messageTime = Date.now() - messageStartTime;
+                            console.error(`❌ Error processing message:`, error);
+                            console.error(`⏱️  Time elapsed before error: ${messageTime}ms`);
+
+                            // ✅ Better error recovery - don't add fixed delays
+                            // The optimized parseSolanaTransaction already has proper error handling
+                        }
+                    },
+                });
+
+                isConnected = true;
+                console.log(`✅ Consumer connected successfully to topic: ${this.sol_block_tx_topic}`);
+                console.log(`📊 Consumer group ID: ${this.sol_block_tx_group_id}`);
+
+            } catch (error) {
+                console.error(`❌ Failed to connect consumer:`, error);
+                isConnected = false;
+                throw error;
+            }
+        };
+
+        // ✅ Add reconnection logic
+        const startWithReconnection = async () => {
+            while (true) {
+                try {
+                    if (!isConnected) {
+                        console.log(`🔄 Attempting to connect consumer...`);
+                        await connectConsumer();
+                    }
+
+                    // Keep the consumer alive
+                    await new Promise(resolve => setTimeout(resolve, 30000));
+
+                } catch (error) {
+                    console.error(`❌ Consumer connection error:`, error);
+                    isConnected = false;
+
+                    // Wait before retrying
+                    console.log(`⏳ Waiting 10 seconds before reconnecting...`);
+                    await new Promise(resolve => setTimeout(resolve, 10000));
+                }
+            }
+        };
+
+        // Start the consumer with reconnection
+        await startWithReconnection();
+    };
+    public startBlockTransactionQueueB = async () => {
+        let consumer: any = null;
+        let isConnected = false;
+
+        const connectConsumer = async () => {
+            try {
+                if (consumer) {
+                    await consumer.disconnect();
+                }
+
+                consumer = await kafkaHelper.kafka.consumer({
+                    groupId: `${this.sol_block_tx_group_id}_b`,
+                    // Add session timeout for better error handling
+                    sessionTimeout: 30000,
+                    // Add heartbeat interval
+                    heartbeatInterval: 3000,
+                });
+
+                await consumer.subscribe({
+                    topic: `${this.sol_block_tx_topic}_b`,
+                    fromBeginning: false, // ✅ Changed to false to prevent reprocessing
+                });
+
+                await consumer.run({
+                    // ✅ Add proper autoCommit configuration
+                    autoCommit: true,
+                    autoCommitInterval: 5000,
+                    autoCommitThreshold: 100,
+
+                    eachMessage: async ({ topic, partition, message }: { topic: any; partition: any; message: any }) => {
+                        const messageStartTime = Date.now();
+                        try {
+                            console.log(`📨 Processing message from topic: ${topic}, partition: ${partition}`);
+
+                            const blockId = JSON.parse(message.value.toString());
+                            console.log(`🔍 Processing block ID: ${blockId}`);
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                            // ✅ Remove fixed delay - let the optimized parseSolanaTransaction handle timing
+                            await this.parseSolanaTransaction(blockId);
+
+                            const messageTime = Date.now() - messageStartTime;
+                            console.log(`✅ ${topic} Message processed successfully in ${messageTime}ms`);
 
                         } catch (error) {
                             const messageTime = Date.now() - messageStartTime;
