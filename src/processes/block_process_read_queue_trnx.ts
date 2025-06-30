@@ -146,7 +146,7 @@ class queue_transactions {
 
                             const blockId = JSON.parse(message.value.toString());
                             console.log(`🔍 Processing block ID: ${blockId}`);
-                            await new Promise(resolve => setTimeout(resolve, 2000));
+                            // await new Promise(resolve => setTimeout(resolve, 2000));
                             // ✅ Remove fixed delay - let the optimized parseSolanaTransaction handle timing
                             await this.parseSolanaTransaction(blockId);
 
@@ -236,7 +236,7 @@ class queue_transactions {
 
                 for await (let trnxData of blockInfo.transactions) {
                     if (trnxData.meta.err !== null) {
-                        console.log('💥 ~ failed tranaction', trnxData.transaction.signatures[0]);
+                        // console.log('💥 ~ failed tranaction', trnxData.transaction.signatures[0]);
                         continue;
                     }
                     let txData: TxType;
@@ -347,7 +347,7 @@ class queue_transactions {
                                         }
                                     }
                                 } else {
-                                    console.log('💥 ~ ~ token address doesnot exist', trnxData?.meta?.postTokenBalances[index].mint)
+                                    // console.log('💥 ~ ~ token address doesnot exist', trnxData?.meta?.postTokenBalances[index].mint)
                                 }
                             }
                             index++;
@@ -418,15 +418,34 @@ class queue_transactions {
                         // console.log('💥 ~ failed tranaction', trnxData.transaction.signatures[0]);
                         continue;
                     }
+                    const accountKeys = trnxData?.transaction?.message?.accountKeys || [];
 
+                    const dexExist = accountKeys.filter((token: any) => this.swapProgramIds?.includes(token));
+
+                    // Skip transactions that aren't related to relevant swap programs
+                    const validDexProgram = [
+                        'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4',
+                        'JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB',
+                        'routeUGWgWzqBWFcrCfv8tritsqukccJPu3q5GPP3xS',
+                        'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
+                    ];
+
+                    if (!dexExist.some((id: any) => validDexProgram.includes(id))) continue;
+
+
+                    // if (!dexExist.includes('JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4') && !dexExist.includes('JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB') && !dexExist.includes('routeUGWgWzqBWFcrCfv8tritsqukccJPu3q5GPP3xS') && !dexExist.includes('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')) {
+                    //     continue;
+                    // }
                     // if (trnxData.transaction.signatures[0] == 'exampletransactionsignature') {
                     // console.log('exampletransactionsignature');
+                    const signature = trnxData.transaction.signatures[0];
 
                     /** for Sol Token Transactions */
-                    if (trnxData?.meta?.postTokenBalances?.length > 0) {
+                    if (trnxData?.meta?.postTokenBalances?.length > 0 && trnxData?.meta?.postTokenBalances?.[1] !== undefined) {
+                        // console.log('Tokens transactionsssssssssssssssss');
                         const preToken = trnxData.meta.preTokenBalances || [];
                         const postToken = trnxData.meta.postTokenBalances || [];
-                        const balancesMap: any = {};
+                        const balancesMap: Record<string, any> = {};
 
                         // Process pre-token balances without await
                         for (const bal of preToken) {
@@ -487,7 +506,7 @@ class queue_transactions {
                                     if (amount <= 0) continue;
 
                                     const txData: TxType = {
-                                        txId: trnxData.transaction.signatures[0],
+                                        txId: signature,
                                         fromAddress: sender.owner,
                                         toAddress: receiver.owner,
                                         token: checkToken,
@@ -495,16 +514,15 @@ class queue_transactions {
                                         blockId: blockId,
                                         isNFTToken: false,
                                         status: trnxData.meta.err == null ? "success" : "failed",
-                                        trnx_fee: Number(await Utility_Helper.exponentialToDecimal(
-                                            await Utility_Helper.bigNumberSafeMath(trnxData.meta.fee, "/", Math.pow(10, 9))
-                                        )),
+                                        trnx_fee: 0,
                                         txType: null,
                                     };
 
                                     // Get both withdraw and deposit status in one Redis call
-                                    const addresses: string[] = [];
-                                    if (txData.fromAddress) addresses.push(txData.fromAddress);
-                                    if (txData.toAddress) addresses.push(txData.toAddress);
+                                    const addresses = [txData.fromAddress, txData.toAddress].filter(Boolean);
+                                    // const addresses: string[] = [];
+                                    // if (txData.fromAddress) addresses.push(txData.fromAddress);
+                                    // if (txData.toAddress) addresses.push(txData.toAddress);
 
                                     if (addresses.length > 0) {
                                         const results = await solProcessHelper.getMultipleKeyValuePairs(`${config.SOL_WALLET_ADDRESS}`, addresses);
@@ -519,6 +537,11 @@ class queue_transactions {
                                     }
 
                                     if (txData.txType !== null) {
+                                        txData.trnx_fee = Number(await Utility_Helper.exponentialToDecimal(
+                                            await Utility_Helper.bigNumberSafeMath(trnxData.meta.fee, "/", Math.pow(10, 9))
+                                        ));
+                                        console.log('Token txData >>>.', txData);
+
                                         txPromises.push(this.addTxToQueue(txData, this.deposit_withdraw_topic || ''));
                                     }
 
@@ -530,11 +553,9 @@ class queue_transactions {
                             // Wait for all transactions to be queued
                             await Promise.all(txPromises);
                         }));
-                    }
-                    /** for Sol Transactions */
-                    if (trnxData?.meta?.postBalances?.length > 0) {
-
-                        const accountKeys = trnxData.transaction.message.accountKeys;
+                    } else if (trnxData?.meta?.postBalances?.length > 0) {
+                        // console.log('SOL transactionsssssssssssssssss');
+                        /** for Sol Transactions */
                         const preBalances = trnxData.meta.preBalances;
                         const postBalances = trnxData.meta.postBalances;
                         // --- SOL Transfers ---
@@ -569,9 +590,7 @@ class queue_transactions {
                                             blockId: blockId,
                                             isNFTToken: false,
                                             status: trnxData.meta.err == null ? "success" : "failed",
-                                            trnx_fee: Number(await Utility_Helper.exponentialToDecimal(
-                                                await Utility_Helper.bigNumberSafeMath(trnxData.meta.fee, "/", Math.pow(10, 9))
-                                            )),
+                                            trnx_fee: 0,
                                             txType: null
                                         };
                                         // console.log('coin txData >>>', txData);
@@ -592,9 +611,10 @@ class queue_transactions {
                                         //     }
                                         // }
 
-                                        const addresses: string[] = [];
-                                        if (txData.fromAddress) addresses.push(txData.fromAddress);
-                                        if (txData.toAddress) addresses.push(txData.toAddress);
+                                        // const addresses: string[] = [];
+                                        // if (txData.fromAddress) addresses.push(txData.fromAddress);
+                                        // if (txData.toAddress) addresses.push(txData.toAddress);
+                                        const addresses = [txData.fromAddress, txData.toAddress].filter(Boolean);
 
                                         if (addresses.length > 0) {
                                             const results = await solProcessHelper.getMultipleKeyValuePairs(`${config.SOL_WALLET_ADDRESS}`, addresses);
@@ -609,7 +629,10 @@ class queue_transactions {
                                         }
                                         // console.log('Coin txData 11 >>>.', txData);
                                         if (txData.txType !== null) {
-                                            // console.log('Coin txData >>>.', txData);
+                                            txData.trnx_fee = Number(await Utility_Helper.exponentialToDecimal(
+                                                await Utility_Helper.bigNumberSafeMath(trnxData.meta.fee, "/", Math.pow(10, 9))
+                                            ));
+                                            console.log('Coin txData >>>.', txData);
                                             await this.addTxToQueue(
                                                 txData,
                                                 this.deposit_withdraw_topic || ''
