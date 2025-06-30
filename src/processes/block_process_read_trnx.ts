@@ -139,11 +139,11 @@ class sol_block_process {
                 let blocks = await this.getBlocks(specific_block, specific_block + 2);
                 if (blocks && blocks?.length > 0) {
                     for await (let block of blocks) {
-                        await this.addTxToQueue(block, config.KAFKA_BLOCKS.SOL_BLOCK_TX_TOPIC);
+                        await this.addTxToQueue(block, `${this.sol_block_tx_topic}_a`);
                     }
                 } else {
                     for (let i: any = specific_block; i <= specific_block + 2; i++) {
-                        await this.addTxToQueue(i, config.KAFKA_BLOCKS.SOL_BLOCK_TX_TOPIC);
+                        await this.addTxToQueue(i, `${this.sol_block_tx_topic}_a`);
                     }
                 }
             }
