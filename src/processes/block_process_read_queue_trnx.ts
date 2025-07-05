@@ -55,6 +55,7 @@ class queue_transactions {
 
                             const blockId = JSON.parse(message.value.toString());
                             console.log(`🔍 Processing block ID: ${blockId}`);
+                            await new Promise(resolve => setTimeout(resolve, 2000));
 
                             // ✅ Remove fixed delay - let the optimized parseSolanaTransaction handle timing
                             this.parseSolanaTransaction(blockId);
@@ -146,7 +147,7 @@ class queue_transactions {
 
                             const blockId = JSON.parse(message.value.toString());
                             console.log(`🔍 Processing block ID: ${blockId}`);
-                            // await new Promise(resolve => setTimeout(resolve, 2000));
+                            await new Promise(resolve => setTimeout(resolve, 2000));
                             // ✅ Remove fixed delay - let the optimized parseSolanaTransaction handle timing
                             this.parseSolanaTransaction(blockId);
 
