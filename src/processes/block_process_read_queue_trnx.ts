@@ -57,7 +57,7 @@ class queue_transactions {
                             console.log(`🔍 Processing block ID: ${blockId}`);
 
                             // ✅ Remove fixed delay - let the optimized parseSolanaTransaction handle timing
-                            await this.parseSolanaTransaction(blockId);
+                            this.parseSolanaTransaction(blockId);
 
                             const messageTime = Date.now() - messageStartTime;
                             console.log(`✅ Message processed successfully in ${messageTime}ms`);
@@ -148,7 +148,7 @@ class queue_transactions {
                             console.log(`🔍 Processing block ID: ${blockId}`);
                             // await new Promise(resolve => setTimeout(resolve, 2000));
                             // ✅ Remove fixed delay - let the optimized parseSolanaTransaction handle timing
-                            await this.parseSolanaTransaction(blockId);
+                            this.parseSolanaTransaction(blockId);
 
                             const messageTime = Date.now() - messageStartTime;
                             console.log(`✅ ${topic} Message processed successfully in ${messageTime}ms`);
