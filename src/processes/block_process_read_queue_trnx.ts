@@ -226,177 +226,177 @@ class queue_transactions {
     //     });
     // };
 
-    public getTxFromBlock = async (blockId: number) => {
-        try {
-            let blockInfo = await this.getBlockTransactions(blockId);
-            if (!blockInfo) {
-                console.log('blockInfo >>>', blockInfo)
-                console.log(`💥 ~ do not get the block info`, `Block Number`, blockId);
-            }
-            if (blockInfo && blockInfo?.transactions && blockInfo?.transactions?.length > 0) {
+    // public getTxFromBlock = async (blockId: number) => {
+    //     try {
+    //         let blockInfo = await this.getBlockTransactions(blockId);
+    //         if (!blockInfo) {
+    //             console.log('blockInfo >>>', blockInfo)
+    //             console.log(`💥 ~ do not get the block info`, `Block Number`, blockId);
+    //         }
+    //         if (blockInfo && blockInfo?.transactions && blockInfo?.transactions?.length > 0) {
 
-                for await (let trnxData of blockInfo.transactions) {
-                    if (trnxData.meta.err !== null) {
-                        // console.log('💥 ~ failed tranaction', trnxData.transaction.signatures[0]);
-                        continue;
-                    }
-                    let txData: TxType;
-                    if (trnxData?.meta?.postTokenBalances?.length > 0 && trnxData?.meta?.postTokenBalances?.[1] !== undefined) {
+    //             for await (let trnxData of blockInfo.transactions) {
+    //                 if (trnxData.meta.err !== null) {
+    //                     // console.log('💥 ~ failed tranaction', trnxData.transaction.signatures[0]);
+    //                     continue;
+    //                 }
+    //                 let txData: TxType;
+    //                 if (trnxData?.meta?.postTokenBalances?.length > 0 && trnxData?.meta?.postTokenBalances?.[1] !== undefined) {
 
-                        let dexExist: any = [];
-                        if (trnxData?.transaction?.message?.accountKeys) {
-                            dexExist = trnxData?.transaction?.message?.accountKeys?.filter((token: any) => this.swapProgramIds?.includes(token));
-                        }
+    //                     let dexExist: any = [];
+    //                     if (trnxData?.transaction?.message?.accountKeys) {
+    //                         dexExist = trnxData?.transaction?.message?.accountKeys?.filter((token: any) => this.swapProgramIds?.includes(token));
+    //                     }
 
-                        if (!dexExist.includes('JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4') && !dexExist.includes('JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB') && !dexExist.includes('routeUGWgWzqBWFcrCfv8tritsqukccJPu3q5GPP3xS') && !dexExist.includes('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')) {
-                            continue;
-                        }
+    //                     if (!dexExist.includes('JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4') && !dexExist.includes('JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB') && !dexExist.includes('routeUGWgWzqBWFcrCfv8tritsqukccJPu3q5GPP3xS') && !dexExist.includes('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')) {
+    //                         continue;
+    //                     }
 
-                        let index = 0;
+    //                     let index = 0;
 
-                        for await (let i of trnxData?.meta.postTokenBalances) {
-                            // if (trnxData?.meta?.postTokenBalances[index]?.mint !== undefined && trnxData?.meta?.postTokenBalances[index]?.owner == trnxData.transaction.message.accountKeys[0]) {
-                            if (trnxData?.meta?.postTokenBalances[index]?.mint !== undefined) {
-                                let checkToken: any = await solProcessHelper.checkIfContract(trnxData?.meta?.postTokenBalances[index].mint);
-                                if (checkToken && Object.keys(checkToken)?.length > 0) {
-                                    let getAmount: any = 0;
-                                    const checkFilter: any = trnxData?.meta?.preTokenBalances?.find(
-                                        (v: any) => v.accountIndex === trnxData?.meta?.postTokenBalances?.[index]?.accountIndex
-                                    );
-                                    /**  check post balance and pre balance token match on same index */
-                                    if (
-                                        checkFilter?.mint !== undefined &&
-                                        checkFilter?.mint == trnxData?.meta?.postTokenBalances[index].mint
-                                    ) {
-                                        getAmount = await this.sub(
-                                            Number(trnxData?.meta?.postTokenBalances[index]?.uiTokenAmount?.uiAmountString),
-                                            Number(checkFilter?.uiTokenAmount?.uiAmountString)
-                                        );
-                                    } else {
-                                        getAmount = Number(trnxData?.meta?.postTokenBalances[index]?.uiTokenAmount?.uiAmountString);
-                                    }
+    //                     for await (let i of trnxData?.meta.postTokenBalances) {
+    //                         // if (trnxData?.meta?.postTokenBalances[index]?.mint !== undefined && trnxData?.meta?.postTokenBalances[index]?.owner == trnxData.transaction.message.accountKeys[0]) {
+    //                         if (trnxData?.meta?.postTokenBalances[index]?.mint !== undefined) {
+    //                             let checkToken: any = await solProcessHelper.checkIfContract(trnxData?.meta?.postTokenBalances[index].mint);
+    //                             if (checkToken && Object.keys(checkToken)?.length > 0) {
+    //                                 let getAmount: any = 0;
+    //                                 const checkFilter: any = trnxData?.meta?.preTokenBalances?.find(
+    //                                     (v: any) => v.accountIndex === trnxData?.meta?.postTokenBalances?.[index]?.accountIndex
+    //                                 );
+    //                                 /**  check post balance and pre balance token match on same index */
+    //                                 if (
+    //                                     checkFilter?.mint !== undefined &&
+    //                                     checkFilter?.mint == trnxData?.meta?.postTokenBalances[index].mint
+    //                                 ) {
+    //                                     getAmount = await this.sub(
+    //                                         Number(trnxData?.meta?.postTokenBalances[index]?.uiTokenAmount?.uiAmountString),
+    //                                         Number(checkFilter?.uiTokenAmount?.uiAmountString)
+    //                                     );
+    //                                 } else {
+    //                                     getAmount = Number(trnxData?.meta?.postTokenBalances[index]?.uiTokenAmount?.uiAmountString);
+    //                                 }
 
-                                    let is_withdraw = false;
-                                    if (typeof getAmount == undefined) {
-                                        getAmount = trnxData?.meta?.postTokenBalances[index]?.uiTokenAmount?.uiAmount;
-                                    } else if (getAmount < 0 || isNaN(getAmount)) {
-                                        getAmount = Math.abs(getAmount);
-                                        is_withdraw = true;
-                                    }
+    //                                 let is_withdraw = false;
+    //                                 if (typeof getAmount == undefined) {
+    //                                     getAmount = trnxData?.meta?.postTokenBalances[index]?.uiTokenAmount?.uiAmount;
+    //                                 } else if (getAmount < 0 || isNaN(getAmount)) {
+    //                                     getAmount = Math.abs(getAmount);
+    //                                     is_withdraw = true;
+    //                                 }
 
-                                    let fromAddress: string = trnxData.transaction.message.accountKeys[0];
-                                    let toAddress: string = trnxData?.meta?.postTokenBalances[index].owner;
-                                    if (dexExist?.length > 0) {
-                                        if (toAddress == fromAddress) {
-                                            fromAddress = is_withdraw ? fromAddress : dexExist[0];
-                                            toAddress = is_withdraw ? dexExist[0] : toAddress;
-                                        } else {
-                                            let fromAddress1 = fromAddress;
-                                            if (is_withdraw) {
-                                                fromAddress = toAddress;
-                                            }
-                                            if (fromAddress1 == toAddress) {
-                                                toAddress = fromAddress1;
-                                            }
-                                        }
-                                    } else {
-                                        if (toAddress == fromAddress) {
-                                            fromAddress = is_withdraw ? fromAddress : trnxData?.meta?.postTokenBalances[index].programId;
-                                            toAddress = is_withdraw ? trnxData?.meta?.postTokenBalances[index].programId : toAddress;
-                                        } else {
-                                            fromAddress = is_withdraw ? toAddress : trnxData?.meta?.postTokenBalances[index].programId;
-                                        }
-                                    }
-                                    txData = {
-                                        txId: trnxData.transaction.signatures[0],
-                                        fromAddress: fromAddress,
-                                        toAddress: toAddress,
-                                        token: checkToken,
-                                        amount: Math.abs(getAmount),
-                                        blockId: blockId,
-                                        isNFTToken: false,
-                                        status: trnxData.meta.err == null ? "success" : "failed",
-                                        trnx_fee: Number(await Utility_Helper.exponentialToDecimal(
-                                            await Utility_Helper.bigNumberSafeMath(trnxData.meta.fee, "/", Math.pow(10, 9))
-                                        )),
-                                        txType: null,
-                                    };
-                                    if (txData.amount !== undefined && Math.abs(txData.amount) > 0) {
-                                        let ourTrnx: any = null;
+    //                                 let fromAddress: string = trnxData.transaction.message.accountKeys[0];
+    //                                 let toAddress: string = trnxData?.meta?.postTokenBalances[index].owner;
+    //                                 if (dexExist?.length > 0) {
+    //                                     if (toAddress == fromAddress) {
+    //                                         fromAddress = is_withdraw ? fromAddress : dexExist[0];
+    //                                         toAddress = is_withdraw ? dexExist[0] : toAddress;
+    //                                     } else {
+    //                                         let fromAddress1 = fromAddress;
+    //                                         if (is_withdraw) {
+    //                                             fromAddress = toAddress;
+    //                                         }
+    //                                         if (fromAddress1 == toAddress) {
+    //                                             toAddress = fromAddress1;
+    //                                         }
+    //                                     }
+    //                                 } else {
+    //                                     if (toAddress == fromAddress) {
+    //                                         fromAddress = is_withdraw ? fromAddress : trnxData?.meta?.postTokenBalances[index].programId;
+    //                                         toAddress = is_withdraw ? trnxData?.meta?.postTokenBalances[index].programId : toAddress;
+    //                                     } else {
+    //                                         fromAddress = is_withdraw ? toAddress : trnxData?.meta?.postTokenBalances[index].programId;
+    //                                     }
+    //                                 }
+    //                                 txData = {
+    //                                     txId: trnxData.transaction.signatures[0],
+    //                                     fromAddress: fromAddress,
+    //                                     toAddress: toAddress,
+    //                                     token: checkToken,
+    //                                     amount: Math.abs(getAmount),
+    //                                     blockId: blockId,
+    //                                     isNFTToken: false,
+    //                                     status: trnxData.meta.err == null ? "success" : "failed",
+    //                                     trnx_fee: Number(await Utility_Helper.exponentialToDecimal(
+    //                                         await Utility_Helper.bigNumberSafeMath(trnxData.meta.fee, "/", Math.pow(10, 9))
+    //                                     )),
+    //                                     txType: null,
+    //                                 };
+    //                                 if (txData.amount !== undefined && Math.abs(txData.amount) > 0) {
+    //                                     let ourTrnx: any = null;
 
-                                        let withdrawTx = await solProcessHelper.getKeyValuePair(`${config.SOL_WALLET_ADDRESS}`, txData.fromAddress);
-                                        if (withdrawTx) {
-                                            txData.txType = TrnxTypeEnum.WITHDRAW;
-                                            ourTrnx = txData;
-                                        }
+    //                                     let withdrawTx = await solProcessHelper.getKeyValuePair(`${config.SOL_WALLET_ADDRESS}`, txData.fromAddress);
+    //                                     if (withdrawTx) {
+    //                                         txData.txType = TrnxTypeEnum.WITHDRAW;
+    //                                         ourTrnx = txData;
+    //                                     }
 
-                                        let depositTx = await solProcessHelper.getKeyValuePair(`${config.SOL_WALLET_ADDRESS}`, txData.toAddress);
-                                        if (depositTx) {
-                                            txData.txType = TrnxTypeEnum.DEPOSIT;
-                                            ourTrnx = txData;
-                                        } else {
-                                            if (is_withdraw) {
-                                                txData.txType = TrnxTypeEnum.WITHDRAW;
-                                            }
-                                        }
+    //                                     let depositTx = await solProcessHelper.getKeyValuePair(`${config.SOL_WALLET_ADDRESS}`, txData.toAddress);
+    //                                     if (depositTx) {
+    //                                         txData.txType = TrnxTypeEnum.DEPOSIT;
+    //                                         ourTrnx = txData;
+    //                                     } else {
+    //                                         if (is_withdraw) {
+    //                                             txData.txType = TrnxTypeEnum.WITHDRAW;
+    //                                         }
+    //                                     }
 
-                                        if (ourTrnx) {
-                                            await this.addTxToQueue(
-                                                ourTrnx,
-                                                this.deposit_withdraw_topic || ''
-                                            );
-                                        }
-                                    }
-                                } else {
-                                    // console.log('💥 ~ ~ token address doesnot exist', trnxData?.meta?.postTokenBalances[index].mint)
-                                }
-                            }
-                            index++;
-                        }
-                    } else {
-                        txData = {
-                            txId: trnxData.transaction.signatures[0],
-                            fromAddress: trnxData.transaction.message.accountKeys[0],
-                            toAddress: trnxData.transaction.message.accountKeys[1],
-                            token: null,
-                            amount: trnxData.meta.postBalances[1] - trnxData.meta.preBalances[1],
-                            blockId: blockId,
-                            isNFTToken: false,
-                            status: trnxData.meta.err == null ? "success" : "failed",
-                            trnx_fee: Number(await Utility_Helper.exponentialToDecimal(
-                                await Utility_Helper.bigNumberSafeMath(trnxData.meta.fee, "/", Math.pow(10, 9))
-                            )),
-                            txType: null
-                        };
-                        if (txData.amount && txData.amount > 0) {
-                            let ourTrnx: any = null;
+    //                                     if (ourTrnx) {
+    //                                         await this.addTxToQueue(
+    //                                             ourTrnx,
+    //                                             this.deposit_withdraw_topic || ''
+    //                                         );
+    //                                     }
+    //                                 }
+    //                             } else {
+    //                                 // console.log('💥 ~ ~ token address doesnot exist', trnxData?.meta?.postTokenBalances[index].mint)
+    //                             }
+    //                         }
+    //                         index++;
+    //                     }
+    //                 } else {
+    //                     txData = {
+    //                         txId: trnxData.transaction.signatures[0],
+    //                         fromAddress: trnxData.transaction.message.accountKeys[0],
+    //                         toAddress: trnxData.transaction.message.accountKeys[1],
+    //                         token: null,
+    //                         amount: trnxData.meta.postBalances[1] - trnxData.meta.preBalances[1],
+    //                         blockId: blockId,
+    //                         isNFTToken: false,
+    //                         status: trnxData.meta.err == null ? "success" : "failed",
+    //                         trnx_fee: Number(await Utility_Helper.exponentialToDecimal(
+    //                             await Utility_Helper.bigNumberSafeMath(trnxData.meta.fee, "/", Math.pow(10, 9))
+    //                         )),
+    //                         txType: null
+    //                     };
+    //                     if (txData.amount && txData.amount > 0) {
+    //                         let ourTrnx: any = null;
 
-                            let withdrawTx = await solProcessHelper.getKeyValuePair(`${config.SOL_WALLET_ADDRESS}`, txData?.fromAddress);
-                            if (withdrawTx) {
-                                txData.txType = TrnxTypeEnum.WITHDRAW;
-                                ourTrnx = txData;
-                            }
+    //                         let withdrawTx = await solProcessHelper.getKeyValuePair(`${config.SOL_WALLET_ADDRESS}`, txData?.fromAddress);
+    //                         if (withdrawTx) {
+    //                             txData.txType = TrnxTypeEnum.WITHDRAW;
+    //                             ourTrnx = txData;
+    //                         }
 
-                            let depositTx = await solProcessHelper.getKeyValuePair(`${config.SOL_WALLET_ADDRESS}`, txData?.toAddress);
-                            if (depositTx) {
-                                txData.txType = TrnxTypeEnum.DEPOSIT;
-                                ourTrnx = txData;
-                            }
+    //                         let depositTx = await solProcessHelper.getKeyValuePair(`${config.SOL_WALLET_ADDRESS}`, txData?.toAddress);
+    //                         if (depositTx) {
+    //                             txData.txType = TrnxTypeEnum.DEPOSIT;
+    //                             ourTrnx = txData;
+    //                         }
 
-                            if (ourTrnx) {
-                                await this.addTxToQueue(
-                                    ourTrnx,
-                                    this.deposit_withdraw_topic || ''
-                                );
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (error) {
-            console.log("🔥 ~ ~ getTxFromBlock error", (error as Error).message);
-        }
-    };
+    //                         if (ourTrnx) {
+    //                             await this.addTxToQueue(
+    //                                 ourTrnx,
+    //                                 this.deposit_withdraw_topic || ''
+    //                             );
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     } catch (error) {
+    //         console.log("🔥 ~ ~ getTxFromBlock error", (error as Error).message);
+    //     }
+    // };
 
     public parseSolanaTransaction = async (blockId: number) => {
         try {
@@ -427,197 +427,120 @@ class queue_transactions {
                     // if (!dexExist.includes('JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4') && !dexExist.includes('JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB') && !dexExist.includes('routeUGWgWzqBWFcrCfv8tritsqukccJPu3q5GPP3xS') && !dexExist.includes('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')) {
                     //     continue;
                     // }
-                    // if (trnxData.transaction.signatures[0] == 'exampletransactionsignature') {
-                    //     console.log('trnxData.transaction.signatures[0]', trnxData.transaction.signatures[0]);
-                    const signature = trnxData.transaction.signatures[0];
+                    if (trnxData.transaction.signatures[0] == 'exampletransactionsignature') {
+                        console.log('trnxData.transaction.signatures[0]', trnxData.transaction.signatures[0]);
+                        const signature = trnxData.transaction.signatures[0];
 
-                    /** for Sol Token Transactions */
-                    if (trnxData?.meta?.postTokenBalances?.length > 0 && trnxData?.meta?.postTokenBalances?.[1] !== undefined) {
-                        const dexExist = accountKeys.filter((token: any) => this.swapProgramIds?.includes(token));
+                        /** for Sol Token Transactions */
+                        if (trnxData?.meta?.postTokenBalances?.length > 0 && trnxData?.meta?.postTokenBalances?.[1] !== undefined) {
+                            const dexExist = accountKeys.filter((token: any) => this.swapProgramIds?.includes(token));
 
-                        // Skip transactions that aren't related to relevant swap programs
-                        const validDexProgram = [
-                            'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4',
-                            'JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB',
-                            'routeUGWgWzqBWFcrCfv8tritsqukccJPu3q5GPP3xS',
-                            'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
-                        ];
+                            // Skip transactions that aren't related to relevant swap programs
+                            const validDexProgram = [
+                                'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4',
+                                'JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB',
+                                'routeUGWgWzqBWFcrCfv8tritsqukccJPu3q5GPP3xS',
+                                'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
+                            ];
 
-                        if (!dexExist.some((id: any) => validDexProgram.includes(id))) continue;
+                            if (!dexExist.some((id: any) => validDexProgram.includes(id))) continue;
+                            // console.log('dexExist 222>>>', dexExist);
 
-                        // console.log('Tokens transactionsssssssssssssssss');
-                        const preToken = trnxData.meta.preTokenBalances || [];
-                        const postToken = trnxData.meta.postTokenBalances || [];
-                        const balancesMap: Record<string, any> = {};
+                            const preToken = trnxData.meta.preTokenBalances || [];
+                            const postToken = trnxData.meta.postTokenBalances || [];
+                            const balancesMap: Record<string, any> = {};
 
-                        // Process pre-token balances without await
-                        for (const bal of preToken) {
-                            const key = `${bal.mint}:${bal.owner}`;
-                            balancesMap[key] = {
-                                mint: bal.mint,
-                                owner: bal.owner,
-                                pre: bal.uiTokenAmount.uiAmount ? parseFloat(bal.uiTokenAmount.uiAmount) : 0,
-                                post: 0
-                            };
-                        }
-
-                        // Process post-token balances without await
-                        for (const bal of postToken) {
-                            const key = `${bal.mint}:${bal.owner}`;
-                            if (!balancesMap[key]) {
+                            // Process pre-token balances without await
+                            for (const bal of preToken) {
+                                const key = `${bal.mint}:${bal.owner}`;
+                                const perAmount =
+                                    typeof bal.uiTokenAmount.uiAmount === 'number' || typeof bal.uiTokenAmount.uiAmount === 'string'
+                                        ? parseFloat(bal.uiTokenAmount.uiAmount as string)
+                                        : 0;
+                                // console.log('parsedAmount 2222>>>', perAmount);
                                 balancesMap[key] = {
                                     mint: bal.mint,
                                     owner: bal.owner,
-                                    pre: 0,
-                                    post: bal.uiTokenAmount.uiAmount ? parseFloat(bal.uiTokenAmount.uiAmount) : 0
+                                    pre: perAmount,
+                                    post: 0
                                 };
-                            } else {
-                                balancesMap[key].post = parseFloat(bal.uiTokenAmount.uiAmount);
                             }
-                        }
+                            console.log('balancesMap 1>>>', balancesMap);
+                            // Process post-token balances without await
+                            for (const bal of postToken) {
+                                const key = `${bal.mint}:${bal.owner}`;
+                                // console.log(' bal.uiTokenAmount.uiAmount >>>', bal.uiTokenAmount.uiAmount);
 
-                        const mints: Set<string> = new Set(Object.values(balancesMap).map((b: any) => b.mint));
-
-                        // Process all mints in parallel
-                        await Promise.all(Array.from(mints).map(async (mint: string) => {
-                            if (!mint) return;
-
-                            const checkToken: any = await solProcessHelper.checkIfContract(mint);
-                            if (!checkToken || Object.keys(checkToken)?.length === 0) return;
-
-                            interface BalanceItem {
-                                mint: string;
-                                owner: string;
-                                pre: number;
-                                post: number;
-                            }
-
-                            const deltas: BalanceItem[] = Object.values(balancesMap).filter((b: any) => b.mint === mint).map((b: any) => ({
-                                mint: b.mint,
-                                owner: b.owner,
-                                pre: b.pre,
-                                post: b.post
-                            }));
-                            const senders: BalanceItem[] = deltas.filter((b) => b.post < b.pre);
-                            const receivers: BalanceItem[] = deltas.filter((b) => b.post > b.pre);
-
-                            // Process all sender-receiver pairs in parallel
-                            const txPromises = [];
-                            for (const sender of senders) {
-                                for (const receiver of receivers) {
-                                    const amount = Math.min(sender.pre - sender.post, receiver.post - receiver.pre);
-                                    if (amount <= 0) continue;
-
-                                    const txData: TxType = {
-                                        txId: signature,
-                                        fromAddress: sender.owner,
-                                        toAddress: receiver.owner,
-                                        token: checkToken,
-                                        amount: amount,
-                                        blockId: blockId,
-                                        isNFTToken: false,
-                                        status: trnxData.meta.err == null ? "success" : "failed",
-                                        trnx_fee: 0,
-                                        txType: null,
+                                const postAmount =
+                                    typeof bal.uiTokenAmount.uiAmount === 'number' || typeof bal.uiTokenAmount.uiAmount === 'string'
+                                        ? parseFloat(bal.uiTokenAmount.uiAmount as string)
+                                        : 0;
+                                // console.log('postAmount 2222>>>', postAmount);
+                                if (!balancesMap[key]) {
+                                    balancesMap[key] = {
+                                        mint: bal.mint,
+                                        owner: bal.owner,
+                                        pre: 0,
+                                        post: postAmount
                                     };
-
-                                    // Get both withdraw and deposit status in one Redis call
-                                    const addresses = [txData.fromAddress, txData.toAddress].filter(Boolean);
-                                    // const addresses: string[] = [];
-                                    // if (txData.fromAddress) addresses.push(txData.fromAddress);
-                                    // if (txData.toAddress) addresses.push(txData.toAddress);
-
-                                    if (addresses.length > 0) {
-                                        const results = await solProcessHelper.getMultipleKeyValuePairs(`${config.SOL_WALLET_ADDRESS}`, addresses);
-                                        if (results) {
-                                            const [withdrawTx, depositTx] = results as string[];
-                                            if (depositTx) {
-                                                txData.txType = TrnxTypeEnum.DEPOSIT;
-                                            } else if (withdrawTx) {
-                                                txData.txType = TrnxTypeEnum.WITHDRAW;
-                                            }
-                                        }
-                                    }
-
-                                    if (txData.txType !== null) {
-                                        txData.trnx_fee = Number(await Utility_Helper.exponentialToDecimal(
-                                            await Utility_Helper.bigNumberSafeMath(trnxData.meta.fee, "/", Math.pow(10, 9))
-                                        ));
-                                        console.log('Token txData >>>.', txData);
-
-                                        txPromises.push(this.addTxToQueue(txData, this.deposit_withdraw_topic || ''));
-                                    }
-
-                                    sender.post += amount;
-                                    receiver.pre += amount;
+                                } else {
+                                    balancesMap[key].post = postAmount;
                                 }
-                            }
+                            };
+                            console.log('balancesMap 2>>>', balancesMap);
 
-                            // Wait for all transactions to be queued
-                            await Promise.all(txPromises);
-                        }));
-                    } else if (trnxData?.meta?.postBalances?.length > 0) {
-                        // console.log('SOL transactionsssssssssssssssss');
-                        /** for Sol Transactions */
-                        const preBalances = trnxData.meta.preBalances;
-                        const postBalances = trnxData.meta.postBalances;
-                        // --- SOL Transfers ---
-                        const solDelta = [];
-                        for (let i = 0; i < preBalances.length; i++) {
-                            const delta = postBalances[i] - preBalances[i];
-                            // console.log('delta >>', delta);
-                            // console.log('accountKeys[i]?.pubkey >>', accountKeys[i]?.pubkey);
-                            if (delta !== 0) {
-                                solDelta.push({
-                                    address: accountKeys[i]?.pubkey || accountKeys[i],
-                                    change: delta
-                                });
-                            }
-                        }
+                            const mints: Set<string> = new Set(Object.values(balancesMap).map((b: any) => b.mint));
+                            // console.log('mints >>>', mints)
+                            // Process all mints in parallel
+                            await Promise.all(Array.from(mints).map(async (mint: string) => {
+                                if (!mint) return;
 
-                        // console.log('solDelta >>>', solDelta);
-                        if (solDelta.length > 0) {
-                            const senders = solDelta.filter(d => d.change < 0);
-                            const receivers = solDelta.filter(d => d.change > 0);
+                                const checkToken: any = await solProcessHelper.checkIfContract(mint);
+                                // console.log('checkToken >>>', checkToken)
+                                if (!checkToken || Object.keys(checkToken)?.length === 0) return;
 
-                            for (const sender of senders) {
-                                for (const receiver of receivers) {
-                                    const amount = Math.min(-sender.change, receiver.change);
-                                    if (amount > 0) {
+                                interface BalanceItem {
+                                    mint: string;
+                                    owner: string;
+                                    pre: number;
+                                    post: number;
+                                }
+
+                                const deltas: BalanceItem[] = Object.values(balancesMap).filter((b: any) => b.mint === mint).map((b: any) => ({
+                                    mint: b.mint,
+                                    owner: b.owner,
+                                    pre: b.pre,
+                                    post: b.post
+                                }));
+                                const senders: BalanceItem[] = deltas.filter((b) => b.post < b.pre);
+                                const receivers: BalanceItem[] = deltas.filter((b) => b.post > b.pre);
+                                console.log('senders >>>', senders)
+                                console.log('receivers >>>', receivers)
+                                // Process all sender-receiver pairs in parallel
+                                const txPromises = [];
+                                for (const sender of senders) {
+                                    for (const receiver of receivers) {
+                                        const amount = Math.min(sender.pre - sender.post, receiver.post - receiver.pre);
+                                        if (amount <= 0) continue;
+
                                         const txData: TxType = {
-                                            txId: trnxData.transaction.signatures[0],
-                                            fromAddress: sender.address,
-                                            toAddress: receiver.address,
-                                            token: null,
+                                            txId: signature,
+                                            fromAddress: sender.owner,
+                                            toAddress: receiver.owner,
+                                            token: checkToken,
                                             amount: amount,
                                             blockId: blockId,
                                             isNFTToken: false,
                                             status: trnxData.meta.err == null ? "success" : "failed",
                                             trnx_fee: 0,
-                                            txType: null
+                                            txType: null,
                                         };
-                                        // console.log('coin txData >>>', txData);
-                                        sender.change += amount;
-                                        receiver.change -= amount;
 
-                                        // if (txData.fromAddress) {
-                                        //     const withdrawTx = await solProcessHelper.getKeyValuePair(`${config.SOL_WALLET_ADDRESS}`, txData.fromAddress);
-                                        //     if (withdrawTx) {
-                                        //         txData.txType = TrnxTypeEnum.WITHDRAW;
-                                        //     }
-                                        // }
-
-                                        // if (txData.toAddress) {
-                                        //     const depositTx = await solProcessHelper.getKeyValuePair(`${config.SOL_WALLET_ADDRESS}`, txData.toAddress);
-                                        //     if (depositTx) {
-                                        //         txData.txType = TrnxTypeEnum.DEPOSIT;
-                                        //     }
-                                        // }
-
+                                        // Get both withdraw and deposit status in one Redis call
+                                        const addresses = [txData.fromAddress, txData.toAddress].filter(Boolean);
                                         // const addresses: string[] = [];
                                         // if (txData.fromAddress) addresses.push(txData.fromAddress);
                                         // if (txData.toAddress) addresses.push(txData.toAddress);
-                                        const addresses = [txData.fromAddress, txData.toAddress].filter(Boolean);
 
                                         if (addresses.length > 0) {
                                             const results = await solProcessHelper.getMultipleKeyValuePairs(`${config.SOL_WALLET_ADDRESS}`, addresses);
@@ -630,23 +553,115 @@ class queue_transactions {
                                                 }
                                             }
                                         }
-                                        // console.log('Coin txData 11 >>>.', txData);
+
                                         if (txData.txType !== null) {
                                             txData.trnx_fee = Number(await Utility_Helper.exponentialToDecimal(
                                                 await Utility_Helper.bigNumberSafeMath(trnxData.meta.fee, "/", Math.pow(10, 9))
                                             ));
-                                            console.log('Coin txData >>>.', txData);
-                                            await this.addTxToQueue(
-                                                txData,
-                                                this.deposit_withdraw_topic || ''
-                                            );
+                                            console.log('Token txData >>>.', txData);
+
+                                            txPromises.push(this.addTxToQueue(txData, this.deposit_withdraw_topic || ''));
+                                        }
+
+                                        sender.post += amount;
+                                        receiver.pre += amount;
+                                    }
+                                }
+
+                                // Wait for all transactions to be queued
+                                await Promise.all(txPromises);
+                            }));
+                        } else if (trnxData?.meta?.postBalances?.length > 0) {
+                            // console.log('SOL transactionsssssssssssssssss');
+                            /** for Sol Transactions */
+                            const preBalances = trnxData.meta.preBalances;
+                            const postBalances = trnxData.meta.postBalances;
+                            // --- SOL Transfers ---
+                            const solDelta = [];
+                            for (let i = 0; i < preBalances.length; i++) {
+                                const delta = postBalances[i] - preBalances[i];
+                                // console.log('delta >>', delta);
+                                // console.log('accountKeys[i]?.pubkey >>', accountKeys[i]?.pubkey);
+                                if (delta !== 0) {
+                                    solDelta.push({
+                                        address: accountKeys[i]?.pubkey || accountKeys[i],
+                                        change: delta
+                                    });
+                                }
+                            }
+
+                            // console.log('solDelta >>>', solDelta);
+                            if (solDelta.length > 0) {
+                                const senders = solDelta.filter(d => d.change < 0);
+                                const receivers = solDelta.filter(d => d.change > 0);
+
+                                for (const sender of senders) {
+                                    for (const receiver of receivers) {
+                                        const amount = Math.min(-sender.change, receiver.change);
+                                        if (amount > 0) {
+                                            const txData: TxType = {
+                                                txId: trnxData.transaction.signatures[0],
+                                                fromAddress: sender.address,
+                                                toAddress: receiver.address,
+                                                token: null,
+                                                amount: amount,
+                                                blockId: blockId,
+                                                isNFTToken: false,
+                                                status: trnxData.meta.err == null ? "success" : "failed",
+                                                trnx_fee: 0,
+                                                txType: null
+                                            };
+                                            // console.log('coin txData >>>', txData);
+                                            sender.change += amount;
+                                            receiver.change -= amount;
+
+                                            // if (txData.fromAddress) {
+                                            //     const withdrawTx = await solProcessHelper.getKeyValuePair(`${config.SOL_WALLET_ADDRESS}`, txData.fromAddress);
+                                            //     if (withdrawTx) {
+                                            //         txData.txType = TrnxTypeEnum.WITHDRAW;
+                                            //     }
+                                            // }
+
+                                            // if (txData.toAddress) {
+                                            //     const depositTx = await solProcessHelper.getKeyValuePair(`${config.SOL_WALLET_ADDRESS}`, txData.toAddress);
+                                            //     if (depositTx) {
+                                            //         txData.txType = TrnxTypeEnum.DEPOSIT;
+                                            //     }
+                                            // }
+
+                                            // const addresses: string[] = [];
+                                            // if (txData.fromAddress) addresses.push(txData.fromAddress);
+                                            // if (txData.toAddress) addresses.push(txData.toAddress);
+                                            const addresses = [txData.fromAddress, txData.toAddress].filter(Boolean);
+
+                                            if (addresses.length > 0) {
+                                                const results = await solProcessHelper.getMultipleKeyValuePairs(`${config.SOL_WALLET_ADDRESS}`, addresses);
+                                                if (results) {
+                                                    const [withdrawTx, depositTx] = results as string[];
+                                                    if (depositTx) {
+                                                        txData.txType = TrnxTypeEnum.DEPOSIT;
+                                                    } else if (withdrawTx) {
+                                                        txData.txType = TrnxTypeEnum.WITHDRAW;
+                                                    }
+                                                }
+                                            }
+                                            // console.log('Coin txData 11 >>>.', txData);
+                                            if (txData.txType !== null) {
+                                                txData.trnx_fee = Number(await Utility_Helper.exponentialToDecimal(
+                                                    await Utility_Helper.bigNumberSafeMath(trnxData.meta.fee, "/", Math.pow(10, 9))
+                                                ));
+                                                console.log('Coin txData >>>.', txData);
+                                                await this.addTxToQueue(
+                                                    txData,
+                                                    this.deposit_withdraw_topic || ''
+                                                );
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                    // }
                 }
 
             }
