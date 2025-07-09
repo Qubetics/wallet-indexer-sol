@@ -514,7 +514,7 @@ class queue_transactions {
                             }));
                             const senders: BalanceItem[] = deltas.filter((b) => b.post < b.pre);
                             const receivers: BalanceItem[] = deltas.filter((b) => b.post > b.pre);
-                            console.log('senders >>>', senders, 'signature >>>' signature)
+                            console.log('senders >>>', senders, 'signature >>>', signature)
                             console.log('receivers >>>', receivers, 'signature >>>', signature)
                             // Process all sender-receiver pairs in parallel
                             const txPromises = [];
