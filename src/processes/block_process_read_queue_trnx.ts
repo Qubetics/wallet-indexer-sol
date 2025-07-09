@@ -465,7 +465,7 @@ class queue_transactions {
                                 post: 0
                             };
                         }
-                        console.log('balancesMap 1>>>', balancesMap);
+                        // console.log('balancesMap 1>>>', balancesMap);
                         // Process post-token balances without await
                         for (const bal of postToken) {
                             const key = `${bal.mint}:${bal.owner}`;
@@ -487,7 +487,7 @@ class queue_transactions {
                                 balancesMap[key].post = postAmount;
                             }
                         };
-                        console.log('balancesMap 2>>>', balancesMap);
+                        // console.log('balancesMap 2>>>', balancesMap);
 
                         const mints: Set<string> = new Set(Object.values(balancesMap).map((b: any) => b.mint));
                         // console.log('mints >>>', mints)
