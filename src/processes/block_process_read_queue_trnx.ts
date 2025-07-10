@@ -454,8 +454,8 @@ class queue_transactions {
                         for (const bal of preToken) {
                             const key = `${bal.mint}:${bal.owner}`;
                             const perAmount =
-                                typeof bal.uiTokenAmount.uiAmount === 'number' || typeof bal.uiTokenAmount.uiAmount === 'string'
-                                    ? parseFloat(bal.uiTokenAmount.uiAmount as string)
+                                typeof bal.uiTokenAmount.uiAmountString === 'number' || typeof bal.uiTokenAmount.uiAmountString === 'string'
+                                    ? parseFloat(bal.uiTokenAmount.uiAmountString as string)
                                     : 0;
                             // console.log('parsedAmount 2222>>>', perAmount);
                             balancesMap[key] = {
@@ -472,8 +472,8 @@ class queue_transactions {
                             // console.log(' bal.uiTokenAmount.uiAmount >>>', bal.uiTokenAmount.uiAmount);
 
                             const postAmount =
-                                typeof bal.uiTokenAmount.uiAmount === 'number' || typeof bal.uiTokenAmount.uiAmount === 'string'
-                                    ? parseFloat(bal.uiTokenAmount.uiAmount as string)
+                                typeof bal.uiTokenAmount.uiAmountString === 'number' || typeof bal.uiTokenAmount.uiAmountString === 'string'
+                                    ? parseFloat(bal.uiTokenAmount.uiAmountString as string)
                                     : 0;
                             // console.log('postAmount 2222>>>', postAmount);
                             if (!balancesMap[key]) {
