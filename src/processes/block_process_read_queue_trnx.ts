@@ -39,7 +39,7 @@ class queue_transactions {
 
                 await consumer.subscribe({
                     topic: `${this.sol_block_tx_topic}_a`,
-                    fromBeginning: false, // ✅ Changed to false to prevent reprocessing
+                    fromBeginning: true, // ✅ Changed to false to prevent reprocessing
                 });
 
                 await consumer.run({
@@ -131,7 +131,7 @@ class queue_transactions {
 
                 await consumer.subscribe({
                     topic: `${this.sol_block_tx_topic}_b`,
-                    fromBeginning: false, // ✅ Changed to false to prevent reprocessing
+                    fromBeginning: true, // ✅ Changed to false to prevent reprocessing
                 });
 
                 await consumer.run({
