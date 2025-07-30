@@ -81,15 +81,15 @@ class SolTxStatusUpdateProcess {
       return await Solana_Helper
         .rpcCall(rpcJson)
         .then((result) => { return result; })
-        .catch(async(err) => {
+        .catch(async (err) => {
           console.log("💥 ~ ~ getTransaction solWeb3.rpcCall error", err);
-            return await Solana_Helper
-              .rpcCallPublicNode(rpcJson)
-              .then((result) => { return result; })
-              .catch((err) => {
-                console.log("💥 ~ ~ getTransaction solWeb3.rpcCallPublicNode error", err);
-                return false;
-              });
+          return await Solana_Helper
+            .rpcCallPublicNode(rpcJson)
+            .then((result) => { return result; })
+            .catch((err) => {
+              console.log("💥 ~ ~ getTransaction solWeb3.rpcCallPublicNode error", err);
+              return false;
+            });
         });
     } catch (error: any) {
       console.log("🔥 ~ ~ getTransaction error", error);
@@ -227,32 +227,36 @@ class SolTxStatusUpdateProcess {
 
             /** update to adrs wallet balance */
             if (to_address !== from_address) {
-              let balance: any = await Wallet_Helper.Update_Balance(
+              const balance: any = await Wallet_Helper.Update_Balance(
                 to_address, /// wallet_address,
                 trx_data?.coin /// coin
               );
-              await global_helper.check_coin_in_wallet(to_address, trx_data?.coin, balance)
-            }
-            const notiMsg = `${trnxTypeD} of ${await Utility_Helper.bigNumberSafeConversion(
-              amount
-            )} ${trx_data?.coin?.coin_symbol.toUpperCase()} has been confirmed.`;
+              await global_helper.check_coin_in_wallet(to_address, trx_data?.coin, balance);
 
-            const notifData: NotificationInterface = {
-              title: trnxTypeD.toUpperCase(),
-              message: notiMsg,
-              amount: amount,
-              from_user_id: user_id,
-              to_user_id: to_user_id,
-              wallet_address: to_address,
-              tx_id: tx_row_id,
-              coin_symbol: coin_symbol,
-              coin_id: trx_data?.coin?.coin_id,
-              coin_family: trx_data?.coin?.coin_family,
-              tx_type: tx_type,
-              notification_type: trnxTypeD,
-              state: "confirmed"
-            };
-            Utility_Helper.SendNotification(notifData);
+            }
+            if (tx_type !== TrnxTypeEnum.DAPP) {
+              const notiMsg = `${trnxTypeD} of ${await Utility_Helper.bigNumberSafeConversion(
+                amount
+              )} ${trx_data?.coin?.coin_symbol.toUpperCase()} has been confirmed.`;
+
+              const notifData: NotificationInterface = {
+                title: trnxTypeD.toUpperCase(),
+                message: notiMsg,
+                amount: amount,
+                from_user_id: user_id,
+                to_user_id: to_user_id,
+                wallet_address: to_address,
+                tx_id: tx_row_id,
+                coin_symbol: coin_symbol,
+                coin_id: trx_data?.coin?.coin_id,
+                coin_family: trx_data?.coin?.coin_family,
+                tx_type: tx_type,
+                notification_type: trnxTypeD,
+                state: "confirmed"
+              };
+              Utility_Helper.SendNotification(notifData);
+            }
+
           }
           return true;
         } else if (status_tx == BlockChainStatusEnum.FAILED) {
@@ -273,8 +277,8 @@ class SolTxStatusUpdateProcess {
             default:
               break;
           }
-          let notiMsg = trx_data?.coin.token_type === "ERC721" ? `Withdraw of NFT(${trx_data?.coin.coin_symbol.toUpperCase()}) with token id ${amount} has been confirmed.` : `${trnxTypeW} request of ${await Utility_Helper.bigNumberSafeConversion(amount)} ${trx_data?.coin.coin_symbol.toUpperCase()} has been failed.`;
-          let notifData: NotificationInterface = {
+          const notiMsg = trx_data?.coin.token_type === "ERC721" ? `Withdraw of NFT(${trx_data?.coin.coin_symbol.toUpperCase()}) with token id ${amount} has been confirmed.` : `${trnxTypeW} request of ${await Utility_Helper.bigNumberSafeConversion(amount)} ${trx_data?.coin.coin_symbol.toUpperCase()} has been failed.`;
+          const notifData: NotificationInterface = {
             title: trnxTypeW.toUpperCase(),
             message: notiMsg,
             amount: amount,
