@@ -18,9 +18,9 @@ class ETHStartProcess {
     this.solWithdrawDepositProcess();
     this.getPendingWithdrawalTxProcess();
     this.updateTxStatusProcess();
-    this.SolUpdateBalance();
+    this.solUpdateBalance();
     this.connectKafka();
-    // this.SolUpdateBalanceByWallet();
+    this.solUpdateBalanceByWallet();
     // this.testing_node()
   }
   public async connectKafka() {
@@ -66,12 +66,12 @@ class ETHStartProcess {
       await solTxStatusUpdateProcess.startTxStatusUpdateQueue();
     }, 10000);
   }
-  public async SolUpdateBalance() {
+  public async solUpdateBalance() {
     setTimeout(async () => {
-      await sol_update_balance_controller.update_wallet_balance();
+      await sol_update_balance_controller.updateWalletConsumer();
     }, 10000);
   }
-  public async SolUpdateBalanceByWallet() {
+  public async solUpdateBalanceByWallet() {
     schedule.scheduleJob("*/2 * * * *", async function () {
       await sol_update_balance_controller.updateWalletBalanceByWallet();
     });
