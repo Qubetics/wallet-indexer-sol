@@ -1,5 +1,12 @@
 import kafkaHelper from "./config/kafka.helper";
-import { solWithdrawDepositProcess, solPendingWithdrawalProcess, solTxStatusUpdateProcess, sol_blocks_process, sol_tx_status_deposit_withdraw, sol_update_balance_controller } from "./processes/index.process"
+import {
+  solWithdrawDepositProcess,
+  solPendingWithdrawalProcess,
+  solTxStatusUpdateProcess,
+  sol_blocks_process,
+  sol_tx_status_deposit_withdraw,
+  sol_update_balance_controller,
+} from "./processes/index.process";
 import schedule from "node-schedule";
 class ETHStartProcess {
   constructor() {
@@ -30,9 +37,9 @@ class ETHStartProcess {
   //   });
   // }
   public readSpecificBlock() {
-    schedule.scheduleJob('*/1 * * * *', async function () {
+    schedule.scheduleJob("*/1 * * * *", async function () {
       await sol_blocks_process.readSpecificBlock();
-    })
+    });
   }
   public consume_read_block_queue() {
     setTimeout(async () => {
@@ -65,7 +72,7 @@ class ETHStartProcess {
     }, 10000);
   }
   public async SolUpdateBalanceByWallet() {
-    schedule.scheduleJob("*/5 * * * *", async function () {
+    schedule.scheduleJob("*/2 * * * *", async function () {
       await sol_update_balance_controller.updateWalletBalanceByWallet();
     });
   }
