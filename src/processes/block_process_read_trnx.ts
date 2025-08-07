@@ -134,18 +134,18 @@ class sol_block_process {
             if (specific_block && Number(specific_block) > 0) {
                 console.table({
                     SPECIFIC_BLOCK: specific_block,
-                    SET_LATEST_BLOCK: specific_block + 2,
+                    // SET_LATEST_BLOCK: specific_block + 2,
                 });
-                let blocks = await this.getBlocks(specific_block, specific_block + 2);
-                if (blocks && blocks?.length > 0) {
-                    for await (let block of blocks) {
-                        await this.addTxToQueue(block, `${this.sol_block_tx_topic}_a`);
-                    }
-                } else {
-                    for (let i: any = specific_block; i <= specific_block + 2; i++) {
-                        await this.addTxToQueue(i, `${this.sol_block_tx_topic}_a`);
-                    }
-                }
+                // let blocks = await this.getBlocks(specific_block, specific_block + 2);
+                // if (blocks && blocks?.length > 0) {
+                //     for await (let block of blocks) {
+                await this.addTxToQueue(specific_block, `${this.sol_block_tx_topic}_a`);
+                //     }
+                // } else {
+                //     for (let i: any = specific_block; i <= specific_block + 2; i++) {
+                //         await this.addTxToQueue(i, `${this.sol_block_tx_topic}_a`);
+                //     }
+                // }
             }
 
             solProcessHelper.setKeyValuePair(

@@ -514,15 +514,28 @@ class queue_transactions {
                             }));
                             const senders: BalanceItem[] = deltas.filter((b) => b.post < b.pre);
                             const receivers: BalanceItem[] = deltas.filter((b) => b.post > b.pre);
-                            console.log('senders >>>', senders, 'signature >>>', signature)
-                            console.log('receivers >>>', receivers, 'signature >>>', signature)
+                            //console.log('senders >>>', senders, 'signature >>>', signature)
+                            //console.log('receivers >>>', receivers, 'signature >>>', signature)
                             // Process all sender-receiver pairs in parallel
                             const txPromises = [];
                             for (const sender of senders) {
                                 for (const receiver of receivers) {
-                                    const amount = Math.min(sender.pre - sender.post, receiver.post - receiver.pre);
-                                    if (amount <= 0) continue;
+                                    const amount =
+                                        senders.length > 1 &&
+                                            receivers.length === 1 &&
+                                            receiver.pre !== receiver.post
+                                            ? Math.max(
+                                                sender.pre - sender.post,
+                                                receiver.post - receiver.pre
+                                            )
+                                            : Math.min(
+                                                sender.pre - sender.post,
+                                                receiver.post - receiver.pre
+                                            );
 
+                                    // const amount = Math.min(sender.pre - sender.post, receiver.post - receiver.pre);
+                                    if (amount <= 0) continue;
+                                    // console.log('receiver >>>', receiver);
                                     const txData: TxType = {
                                         txId: signature,
                                         fromAddress: sender.owner,
