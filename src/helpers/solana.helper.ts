@@ -109,7 +109,7 @@ class Solana {
 		throw new Error("All Solana RPC nodes failed.");
 	};
 
-	public async getSolanaBalance(wallet: string, inSolana: boolean): Promise<string | number> {
+	public async getSolanaBalance(wallet: string, inSolana: boolean): Promise<string | number | null> {
 		try {
 			let balanceInWei = await this.connection.getBalance(new PublicKey(wallet));
 			if (balanceInWei === 0) {
@@ -124,12 +124,12 @@ class Solana {
 			return balanceInWei;
 		} catch (err) {
 			console.log('🔥 ~ ~ getUserSolanaBalance node.solana.helper.ts error', err);
-			return 0;
+			return null;
 		}
 	}
 
-	public async getCRC20TokenBalance(walletAddress: string, tokenAddress: string): Promise<number> {
-		const fetchTokenAccountBalance = async (connection: any): Promise<number> => {
+	public async getCRC20TokenBalance(walletAddress: string, tokenAddress: string): Promise<number | null> {
+		const fetchTokenAccountBalance = async (connection: any): Promise<number | null> => {
 			const walletPublicKey = new PublicKey(walletAddress);
 			const mintPublicKey = new PublicKey(tokenAddress);
 
@@ -147,10 +147,10 @@ class Solana {
 					const balance = Number(amount) / (10 ** decimals);
 					return balance;
 				}
-				return 0;
+				return null;
 			} catch (error) {
 				console.log('🔥 ~ ~ Error fetching token balance:', error);
-				return 0;
+				return null;
 			}
 		};
 
@@ -158,7 +158,7 @@ class Solana {
 		let balance = await fetchTokenAccountBalance(this.connectionNew);
 
 		// If no balance from the "new" connection, fall back to public node
-		if (balance === 0) {
+		if (balance == null) {
 			console.log('🚀 ~ Falling back to PUBLIC NODE');
 			balance = await fetchTokenAccountBalance(this.connectionPublic);
 		}
@@ -171,7 +171,7 @@ class Solana {
 		coin: any
 	) => {
 		try {
-			let balance: number = 0;
+			let balance: number | null = null;
 			if (coin.is_token == BooleanEnum.true) {
 				switch (coin.token_type) {
 
@@ -182,7 +182,7 @@ class Solana {
 						)
 						break;
 					default:
-						balance = 0
+						balance = null
 						break;
 				}
 			} else {

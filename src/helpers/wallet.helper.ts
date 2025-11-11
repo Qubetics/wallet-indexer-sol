@@ -14,14 +14,14 @@ class WalletHelper {
         coin: CoinInterface,
     ) => {
         try {
-            let balance: number | null = 0;
+            let balance: number | null = null;
             if (coin) {
                 switch (coin.coin_family) {
                     case CoinFamilyEnum.SOL:
                         balance = await Solana_Helper.getBalance(address, coin);
                         break;
                     default:
-                        balance = 0;
+                        balance = null;
                         break;
                 }
             }
