@@ -6,6 +6,10 @@ import { TrnxTypeEnum } from "../enum";
 import { global_helper } from "../helpers/global_helper";
 import solProcessHelper from "./process.helper";
 
+
+import { PublicKey } from '@solana/web3.js';
+
+
 class queue_transactions {
     public swapProgramIds: any;
 
@@ -683,6 +687,148 @@ class queue_transactions {
             console.error("Error processing block:", error);
             // Add longer delay on error before processing next block
             await this.sleep(5000);
+        }
+    }
+    
+    //Optimised code for parsing solana transactions currently Under  Review
+    public parseSolanaTransactionV2 = async (blockId: number) => {
+        const blockInfo = await this.getBlockTransactions(blockId);
+        if (!blockInfo) {
+            console.log('blockInfo >>>', blockInfo)
+            console.log(`💥 ~ do not get the block info`, `Block Number`, blockId);
+            return;
+        }
+    
+        if (blockInfo?.transactions?.length > 0) {
+            for await (const trnxData of blockInfo.transactions) {
+                if (trnxData.meta.err !== null) {
+                    continue; // Skip failed transactions
+                }
+    
+                const signature = trnxData.transaction.signatures[0];
+                const accountKeys = trnxData.transaction.message?.accountKeys?.map((k: any) => new PublicKey(k).toBase58());
+    
+                // Process only if instructions exist
+                if (trnxData.transaction.message.instructions.length > 0 || trnxData.meta.innerInstructions.length > 0) {
+                    
+                    // DEX Program Map
+                    const DEX_PROGRAMS: Record<string, string> = {
+                        "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4": "Jupiter",
+                        "JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB": "Jupiter",
+                        "routeUGWgWzqBWFcrCfv8tritsqukccJPu3q5GPP3xS": "Jupiter Route",
+                        "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA": "Token Program",
+                        "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin": "Serum",
+                        "RVKd61ztZW9GUwhRbb7hFhvVcXUX7dH2q92waZcFc8b": "Raydium",
+                        "orcarKHSj1B2h8ZQmYyQK8wLgjG48SvUjRk6ET9t3m8": "Orca",
+                        "Whirlpools111111111111111111111111111111111": "Orca Whirlpools"
+                    };
+    
+                    const fullAccountKeys = solProcessHelper.getAllAccountKeys(trnxData.meta?.loadedAddresses, accountKeys);
+                    const tokenOwnerMap = solProcessHelper.buildTokenOwners(trnxData.meta, fullAccountKeys);
+    
+                    // Combine top-level + inner instructions
+                    const instructions = [
+                        ...trnxData.transaction.message.instructions,
+                        ...(trnxData.meta.innerInstructions || []).flatMap((inner: any) => inner.instructions),
+                    ];
+    
+                    const tokenProgram = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
+                    const txPromises: Promise<any>[] = [];
+    
+                    // -------- SPL Transfers + DEX Transactions --------
+                    for (const ix of instructions) {
+                        const programId = ix?.programId || fullAccountKeys[ix.programIdIndex];
+                        const programIdBase58 = new PublicKey(programId).toBase58();
+                        const dexName = DEX_PROGRAMS[programIdBase58] || null;
+    
+                        // Only process if it's Token Program or DEX program
+                        if (programIdBase58 !== tokenProgram && !dexName) continue;
+    
+                        const parsed = ix?.parsed
+                            ? {
+                                source: ix.parsed.info.source,
+                                destination: ix.parsed.info.destination,
+                                mint: ix.parsed.info.mint,
+                                amount: ix.parsed.info.amount,
+                            }
+                            : solProcessHelper.decodeTokenInstruction(ix, fullAccountKeys);
+    
+                        if (!parsed) continue;
+    
+                        const mint = parsed.mint || tokenOwnerMap[parsed.source]?.mint || tokenOwnerMap[parsed.destination]?.mint;
+                        const checkToken: any = await solProcessHelper.checkIfContract(mint);
+    
+                        if (!checkToken || Object.keys(checkToken).length === 0) continue;
+    
+                        const fromOwner = tokenOwnerMap[parsed.source]?.owner || parsed.source;
+                        const toOwner = tokenOwnerMap[parsed.destination]?.owner || parsed.destination;
+    
+                        const decimals = new BigNumber(checkToken?.large_decimal_value || 1);
+                        const amount: string = new BigNumber(parsed.amount).dividedBy(decimals).toString();
+    
+                        const txData: any = {
+                            txn_hash: signature,
+                            from_address: fromOwner,
+                            to_address: toOwner,
+                            token_data: checkToken,
+                            withdraw_amount: amount,
+                            deposit_amount: amount,
+                            status: trnxData.meta.err == null ? "success" : "failed",
+                            trnx_fee: trnxData.meta.fee,
+                            txn_type: dexName, // ✅ Store DEX name if matched
+                            block_number: blockId
+                        };
+    
+                        txPromises.push(this.checkAddressInDB(txData));
+                    }
+    
+                    await Promise.all(txPromises);
+                }
+    
+                // -------- Native SOL Transfers --------
+                const solTxPromises: Promise<any>[] = [];
+    
+                if (trnxData?.meta?.postBalances?.length > 0) {
+                    const pre = trnxData.meta.preBalances || [];
+                    const post = trnxData.meta.postBalances || [];
+                    const diffs = accountKeys.map((k: string, i: number) => ({
+                        account: k,
+                        diff: (post[i] - pre[i]) / 1e9,
+                    }));
+    
+                    const senders = diffs.filter((d: any) => d.diff < 0);
+                    const receivers = diffs.filter((d: any) => d.diff > 0);
+    
+                    for (const s of senders) {
+                        let remaining = Math.abs(s.diff);
+                        for (const r of receivers) {
+                            if (r.diff <= 0) continue;
+                            const amt = Math.min(remaining, r.diff);
+                            if (amt <= 0) continue;
+    
+                            const txData: any = {
+                                txn_hash: signature,
+                                from_address: s.account,
+                                to_address: r.account,
+                                token_data: null,
+                                withdraw_amount: amt.toString(),
+                                deposit_amount: amt.toString(),
+                                status: trnxData.meta.err == null ? "success" : "failed",
+                                trnx_fee: trnxData.meta.fee,
+                                txn_type: null, // Native SOL has no DEX
+                                block_number: blockId
+                            };
+    
+                            solTxPromises.push(this.checkAddressInDB(txData));
+    
+                            remaining -= amt;
+                            r.diff -= amt;
+                            if (remaining <= 0) break;
+                        }
+                    }
+                    await Promise.all(solTxPromises);
+                }
+            }
         }
     }
 

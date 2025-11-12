@@ -8,6 +8,10 @@ import { BooleanEnum, CoinFamilyEnum } from "../enum";
 import { global_helper } from "../helpers/global_helper";
 import { Op } from "sequelize";
 
+import { PublicKey } from '@solana/web3.js';
+import bs58 from "bs58";
+
+
 class SolProcessHelper {
   public CoinsInterface: CoinInterface[];
   public WalletAddresses: WalletInterface[];
@@ -254,6 +258,100 @@ class SolProcessHelper {
   //     return null;
   //   }
   // }
+
+  public getAllAccountKeys = (loadedAddresses: any, accountKeys: any) => {
+    if (!loadedAddresses) return accountKeys;
+    
+    // Safely convert loaded readonly addresses with error handling
+    const loadedReadOnly = (loadedAddresses.readonly || []).map((k: any) => {
+        try {
+            if (typeof k === 'string') {
+                // Validate if it's a valid base58 PublicKey
+                new PublicKey(k);
+                return k;
+            } else if (k && typeof k === 'object' && k.length === 32) {
+                // If it's a Uint8Array or Buffer, convert to base58
+                return new PublicKey(k).toBase58();
+            } else {
+                console.warn('💥 ~ Invalid loaded readonly key format, skipping:', k);
+                return null;
+            }
+        } catch (keyError) {
+            console.warn('💥 ~ Failed to convert loaded readonly key, skipping:', k, keyError);
+            return null;
+        }
+    }).filter((k: any) => k !== null);
+    
+    // Safely convert loaded writable addresses with error handling
+    const loadedWritable = (loadedAddresses.writable || []).map((k: any) => {
+        try {
+            if (typeof k === 'string') {
+                // Validate if it's a valid base58 PublicKey
+                new PublicKey(k);
+                return k;
+            } else if (k && typeof k === 'object' && k.length === 32) {
+                // If it's a Uint8Array or Buffer, convert to base58
+                return new PublicKey(k).toBase58();
+            } else {
+                console.warn('💥 ~ Invalid loaded writable key format, skipping:', k);
+                return null;
+            }
+        } catch (keyError) {
+            console.warn('💥 ~ Failed to convert loaded writable key, skipping:', k, keyError);
+            return null;
+        }
+    }).filter((k: any) => k !== null);
+    
+    return [...accountKeys, ...loadedWritable, ...loadedReadOnly];
+  }
+
+
+  public buildTokenOwners = (meta: any, accountKeys: any) => {
+    const map: any = {};
+    const all = [...(meta.preTokenBalances || []), ...(meta.postTokenBalances || [])];
+    for (const bal of all) {
+        const account = accountKeys[bal.accountIndex]; // token account
+        map[account] = {
+            owner: bal.owner,
+            mint: bal.mint,
+        };
+    }
+    return map;
+}
+
+
+public decodeTokenInstruction = (ix: any, accountKeys: any) => {
+  const data: any = Buffer.from(bs58.decode(ix.data));
+  const discriminator = data[0];
+
+  if (discriminator === 3) { // Transfer
+      const amount = data.readBigUInt64LE(1);
+      return {
+          type: "transfer",
+          source: accountKeys[ix.accounts[0]],
+          destination: accountKeys[ix.accounts[1]],
+          authority: accountKeys[ix.accounts[2]],
+          amount: amount.toString(),
+      };
+  }
+
+  if (discriminator === 12) { // TransferChecked
+      const amount = data.readBigUInt64LE(1);
+      return {
+          type: "transferChecked",
+          source: accountKeys[ix.accounts[0]],
+          mint: accountKeys[ix.accounts[1]],
+          destination: accountKeys[ix.accounts[2]],
+          authority: accountKeys[ix.accounts[3]],
+          amount: amount.toString(),
+      };
+  }
+
+  return null;
+}
+
+ 
+
 
 }
 const solProcessHelper = new SolProcessHelper();
