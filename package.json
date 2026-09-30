@@ -50,5 +50,8 @@
   },
   "devDependencies": {
     "@types/node-zookeeper-client": "^0.2.8"
+  },
+  "overrides": {
+    "rpc-websockets": "9.3.1"
   }
 }
