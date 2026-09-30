@@ -736,7 +736,7 @@ class queue_transactions {
                         encoding: "json",
                         transactionDetails: "full",
                         rewards: false,
-                        maxSupportedTransactionVersion: 0
+                        maxSupportedTransactionVersion: 1
                     },
                 ],
             };

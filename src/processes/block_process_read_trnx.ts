@@ -88,7 +88,7 @@ class sol_block_process {
                 jsonrpc: "2.0",
                 id: 1,
                 method: "getBlocks",
-                params: [startBlock, endBlock],
+                params: [startBlock, endBlock, { maxSupportedTransactionVersion: 1 }],
             };
             return await Solana_Helper
                 .rpcCall(rpcJson)

@@ -76,7 +76,7 @@ class SolTxStatusUpdateProcess {
         jsonrpc: "2.0",
         id: 1,
         method: "getTransaction",
-        params: [tx_id, { encoding: "jsonParsed", maxSupportedTransactionVersion: 0 }],
+        params: [tx_id, { encoding: "jsonParsed", maxSupportedTransactionVersion: 1 }],
       };
       return await Solana_Helper
         .rpcCall(rpcJson)

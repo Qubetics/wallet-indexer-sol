@@ -53,6 +53,12 @@ class Solana {
 				const response = await axios.post(`${config.config.NODE.SOL_RPC_URL}`, body, options);
 
 				if (response.status === 200) {
+					// JSON-RPC errors (e.g. -32015 unsupported tx version, -32009
+					// slot skipped) come back as HTTP 200 with no `result` - throw
+					// so callers see the real error and fall back to other nodes.
+					if (response.data?.error) {
+						throw new Error(`RPC error ${response.data.error.code}: ${response.data.error.message}`);
+					}
 					return response.data.result;
 				} else {
 					console.log('🔥 ~ rpcCall response status error');
@@ -92,6 +98,12 @@ class Solana {
 					const response = await axios.post(nodeUrl, body, options);
 					if (response.status === 200) {
 						// console.log('response.data.result >>', response.data.result);
+						// JSON-RPC errors (e.g. -32015 unsupported tx version, -32009
+						// slot skipped) come back as HTTP 200 with no `result` - throw
+						// so callers see the real error and fall back to other nodes.
+						if (response.data?.error) {
+							throw new Error(`RPC error ${response.data.error.code}: ${response.data.error.message}`);
+						}
 						return response.data.result;
 					} else {
 						console.log(`🔥 ~ rpcCall error: Non-200 status from ${nodeUrl}`);
