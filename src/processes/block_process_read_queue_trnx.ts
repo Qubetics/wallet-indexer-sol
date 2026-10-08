@@ -688,31 +688,6 @@ class queue_transactions {
         }
     }
 
-    public async checkAddressInDB(txData: TxType) {
-        try {
-            let ourTrnx: any = null;
-            let withdraw = await solProcessHelper.check_our_wallet_address(txData.fromAddress);
-            if (withdraw) {
-                console.log("Found the user in FROM (WITHDRAW) tx 😸");
-                txData.txType = TrnxTypeEnum.WITHDRAW;
-                ourTrnx = txData;
-            }
-            let deposit = await solProcessHelper.check_our_wallet_address(txData.toAddress);
-            if (deposit) {
-                console.log("Found the user in to (DEPOSIT) tx 😸");
-                txData.txType = TrnxTypeEnum.DEPOSIT;
-                ourTrnx = txData;
-            }
-            if (ourTrnx) {
-                await sol_tx_status_deposit_withdraw.addTxToQueue(
-                    ourTrnx,
-                    this.deposit_withdraw_topic || ""
-                );
-            }
-        } catch (err: any) {
-            console.error("Error in checkAddressInDB>>", err)
-        }
-    }
 
     public async addTxToQueue(data: TxType, queueName: string) {
         try {
@@ -762,24 +737,6 @@ class queue_transactions {
         }
     };
 
-    private sub = async (b: number, c: number) => {
-        try {
-            let b1 = b.toString().split(".");
-            let b1_max = 0;
-            if (b1.length == 2) {
-                b1_max = b1[1].length;
-            }
-            let c1 = c.toString().split(".");
-            let c1_max = 0;
-            if (c1.length == 2) {
-                c1_max = c1[1].length;
-            }
-            let max_len = b1_max > c1_max ? b1_max : c1_max;
-            return Number((b - c).toFixed(max_len));
-        } catch (error) {
-            console.log('💥 ~ ~ sub error', (error as Error).message);
-        }
-    };
 
     private sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
