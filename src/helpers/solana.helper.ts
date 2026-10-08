@@ -3,7 +3,6 @@ import { config } from "../config/index";
 import { AccountLayout } from "@solana/spl-token";
 import { PublicKey, Connection } from "@solana/web3.js"
 import { BooleanEnum, TokenStandard } from "../enum";
-import { SolanaRpcNodes } from "../constants/public_nodes";
 
 class Solana {
 	public connection: Connection;
@@ -11,7 +10,7 @@ class Solana {
 	public connectionPublic: Connection;
 	constructor() {
 		this.connection = new Connection(config.config.NODE.SOL_RPC_URL || '', 'confirmed');
-		this.connectionNew = new Connection("https://solana-mainnet.g.alchemy.com/v2/REDACTED");
+		this.connectionNew = new Connection(`https://solana-mainnet.g.alchemy.com/v2/${config.config.ALCHEMY_SOLANA_KEY}`);
 		this.connectionPublic = new Connection("https://api.mainnet-beta.solana.com");
 	}
 
@@ -88,7 +87,7 @@ class Solana {
 	};
 
 	public rpcCallPublicNode = async (body: {}) => {
-		for (const nodeUrl of SolanaRpcNodes) {
+		for (const nodeUrl of config.config.SOL_PUBLIC_RPC_NODES) {
 			try {
 				const result = await this.retryWithBackoff(async () => {
 					const options = {

@@ -14,6 +14,9 @@ export const config = {
   MIN_BLOCK_CONFORMATIONS: zookeeperConfig.config.MIN_BLOCK_CONFIRMATIONS_SOL,
   TOKEN_TYPE_SOL: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.TOKEN_TYPE_SOL}`,
   STATIC_COIN_FAMILY: zookeeperConfig.config.STATIC_COIN_FAMILY,
+  FIREBASE_SERVICE_ACCOUNT: zookeeperConfig.config.FIREBASE_SERVICE_ACCOUNT,
+  SOL_PUBLIC_RPC_NODES: zookeeperConfig.config.SOL_PUBLIC_RPC_NODES,
+  ALCHEMY_SOLANA_KEY: zookeeperConfig.config.ALCHEMY_SOLANA_KEY,
   REDISKEYS: {
     LAST_BLOCK_NUMBER: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.LAST_BLOCK_NUMBER_SOL}`,
     ALL_PROCESSES: zookeeperConfig.config.ALL_PROCESSES,
