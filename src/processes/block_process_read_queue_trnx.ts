@@ -204,32 +204,6 @@ class queue_transactions {
         }
     };
 
-    public async checkAddressInDB(txData: TxType) {
-        try {
-            let ourTrnx: any = null;
-            let withdraw = await solProcessHelper.check_our_wallet_address(txData.fromAddress);
-            if (withdraw) {
-                console.log("Found the user in FROM (WITHDRAW) tx 😸");
-                txData.txType = TrnxTypeEnum.WITHDRAW;
-                ourTrnx = txData;
-            }
-            let deposit = await solProcessHelper.check_our_wallet_address(txData.toAddress);
-            if (deposit) {
-                console.log("Found the user in to (DEPOSIT) tx 😸");
-                txData.txType = TrnxTypeEnum.DEPOSIT;
-                ourTrnx = txData;
-            }
-            if (ourTrnx) {
-                await sol_tx_status_deposit_withdraw.addTxToQueue(
-                    ourTrnx,
-                    this.deposit_withdraw_topic || ""
-                );
-            }
-        } catch (err: any) {
-            console.error("Error in checkAddressInDB>>", err)
-        }
-    }
-
     public async addTxToQueue(data: TxType, queueName: string) {
         try {
             await kafkaHelper.produceMessage(queueName, data)
