@@ -1,2 +1,2 @@
-# Qubetic Sol Processes
+# Qubetics SOL Processes
 
