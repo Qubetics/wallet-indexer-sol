@@ -145,7 +145,6 @@ class SolProcessHelper {
           );
         }
       }
-      //redisClient.set(config.TOKEN_TYPE_SOL || "", JSON.stringify(tokens));
     } catch (err: any) {
       console.error('fetchERC20Tokens >>>>>', err);
       await global_helper.save_error_logs('Sol_fetchSPLTokens', err.message)
@@ -180,9 +179,6 @@ class SolProcessHelper {
   public checkIfContract = async (address: string) => {
     try {
       let token_data: any = await this.getKeyValuePair(config.TOKEN_TYPE_SOL, address);
-      // if (token_data) {
-      //   console.log("token_data>>>>>>>>", token_data)
-      // }
       return JSON.parse(token_data);
     } catch (err: any) {
       console.error('check_our_wallet_address >>>>>', err);
@@ -190,22 +186,6 @@ class SolProcessHelper {
     }
   };
 
-  // public checkIfContract = async (address: string) => {
-  //   try {
-  //     const getAsync = promisify(redisClient.get).bind(redisClient);
-  //     const value = await getAsync(config.TOKEN_TYPE_SOL || "");
-
-  //     const erc20Tokens: CoinInterface[] = value ? JSON.parse(value) : [];
-  //     const token = erc20Tokens.find(
-  //       (el: any) => Number(el.is_token) === Number(BooleanEnum.true) && el.token_address?.toUpperCase() === address?.toUpperCase()
-  //     );
-  //     if (token) return token;
-  //     return null;
-  //   } catch (error: any) {
-  //     console.error('checkIfContract >>>', error);
-  //     return null;
-  //   }
-  // };
 
   public check_our_wallet_address = async (address: string) => {
     try {
@@ -219,41 +199,7 @@ class SolProcessHelper {
       return null;
     }
   };
-  // public NativeCoinByCoinFamily = async (
-  //   coin_family: CoinFamilyEnum
-  // ) => {
-  //   try {
-  //     const getAsync = promisify(redisClient.get).bind(redisClient);
-  //     const value = await getAsync(config.TOKEN_TYPE_SOL || "");
 
-  //     const erc20Tokens: CoinInterface[] = value ? JSON.parse(value) : [];
-  //     return erc20Tokens.find(
-  //       (el: CoinInterface) => Number(el.is_token) === Number(BooleanEnum.false) && el.coin_family === coin_family
-  //     );
-
-  //   } catch (error: any) {
-  //     console.error(`NativeCoinByCoinFamily >>>`, error);
-  //     return 0;
-  //   }
-  // }
-
-  // public CoinByCoinId = async (
-  //   coin_id: number
-  // ) => {
-  //   try {
-  //     const getAsync = promisify(redisClient.get).bind(redisClient);
-  //     const value = await getAsync(config.TOKEN_TYPE_SOL || "");
-
-  //     const erc20Tokens: CoinInterface[] = value ? JSON.parse(value) : [];
-  //     return erc20Tokens.find(
-  //       (el: CoinInterface) => el.coin_id === coin_id
-  //     );
-
-  //   } catch (error: any) {
-  //     console.error(`CoinByCoinId >>>`, error);
-  //     return null;
-  //   }
-  // }
 
 }
 const solProcessHelper = new SolProcessHelper();

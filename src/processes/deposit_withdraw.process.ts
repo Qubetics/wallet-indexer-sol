@@ -44,7 +44,6 @@ class SolDepositWithdrawProcess {
     if (data.amount == 0) {
       console.log("amount === 0")
     } else {
-      // console.log("amount is more than 0", data)
       let coin_data: any = null;
       let finalamount: any = 0;
       if (data.token) {

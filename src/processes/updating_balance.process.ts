@@ -30,11 +30,6 @@ class solUpdateBalanceController {
                     partition: any;
                     message: any;
                 }) => {
-                    // console.log("🚀 ~ startTxStatusUpdateQueue topic >>>>", topic);
-                    // console.log(
-                    //     "🚀 ~ startTxStatusUpdateQueue message.value >>>>",
-                    //     message.value.toString()
-                    // );
                     await this.updateBalance(JSON.parse(message.value.toString()));
                 },
             })
@@ -49,14 +44,11 @@ class solUpdateBalanceController {
                 console.log(`Balance update attempts exceeded (5) for address: ${data.wallet_address}`);
                 return;
             }
-            // console.log('data.coin_data >>>', data.coin_data);
-            // console.log('data.wallet_address >>>', data.wallet_address);
 
             const balance: any = await Wallet_Helper.Fetch_Balance(
                 data.wallet_address,
                 data.coin_data
             );
-            // console.log('balance >>>', balance);
             if (balance !== null) {
                 const currentBalance = data.balance !== undefined ? Number(data.balance) : undefined;
                 if (currentBalance === undefined || currentBalance !== balance) {
@@ -69,9 +61,7 @@ class solUpdateBalanceController {
                             },
                         }
                     );
-                    // console.log(`Balance updated for ${data.wallet_address}: ${balance}`);
                 } else {
-                    // console.log(`Balance unchanged for ${data.wallet_address}: ${balance}`);
                 }
             } else {
                 if (data.queue_count <= 5) {
@@ -103,18 +93,10 @@ class solUpdateBalanceController {
                 config.config.REDISKEYS.ALL_PROCESSES,
                 "WalletCount"
             );
-            // console.log(
-            //     "🚀 ~ solUpdateBalanceController ~ publicupdateWalletBalanceByWal ~ findCoinCounter:",
-            //     findCoinCounter
-            // );
 
             if (findCoinCounter) {
                 coin_limit_count = Number(findCoinCounter);
             }
-            // console.log(
-            //     "🚀 ~ solUpdateBalanceController ~ publicupdateWalletBalanceByWal ~ coin_limit_count:",
-            //     coin_limit_count
-            // );
             const wallets: any = await WalletModel.findAll({
                 attributes: ["wallet_address", "balance"],
                 where: {
@@ -130,7 +112,6 @@ class solUpdateBalanceController {
                 limit,
                 offset: coin_limit_count,
                 order: [['wallet_id', 'ASC']],
-                // raw: true,
                 nest: true,
             });
             if (!wallets) {
@@ -143,7 +124,6 @@ class solUpdateBalanceController {
             if (wallets.length > 0) {
                 for (const wallet of wallets) {
                     const coin_data = wallet.coin_data;
-                    // console.log('coin_data >>>', coin_data);
                     if (!coin_data) return false;
                     const payload = {
                         coin_data: coin_data,
@@ -151,7 +131,6 @@ class solUpdateBalanceController {
                         balance: wallet.balance,
                         queue_count: 0,
                     };
-                    // console.log('payload >>>', payload);
                     await kafkaHelper.produceMessage(
                         this.sol_pending_balance_update_topic,
                         payload
@@ -172,7 +151,6 @@ class solUpdateBalanceController {
                     coin_limit_count.toString()
                 );
             }
-            // console.log("\nEND");
             return true;
         } catch (err: any) {
             console.error("Error in updateWalletBalanceByWallet", err);

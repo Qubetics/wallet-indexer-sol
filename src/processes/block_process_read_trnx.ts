@@ -31,7 +31,6 @@ class sol_block_process {
             });
             if (lastBlockProcessed <= lastBlockToProcess) {
                 let blocks = await this.getBlocks(lastBlockProcessed, lastBlockToProcess);
-                // console.log('blocks 222>>>', blocks);
 
                 if (blocks && blocks?.length > 0) {
                     for await (let block of blocks) {
@@ -105,10 +104,6 @@ class sol_block_process {
                             return false;
                         });
                 });
-            // .catch((error) => {
-            //     console.log("🔥 ~ ~ getBlocks solWeb3.rpcCall error", error);
-            //     return false;
-            // });
         } catch (error: any) {
             console.log("🔥 ~ ~ getBlocks error", error);
             return false;

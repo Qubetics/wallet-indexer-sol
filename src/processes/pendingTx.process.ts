@@ -22,7 +22,6 @@ class SolPendingWithdrawalProcess {
         req_type: { [Op.notIn]: ['TRANSAK', 'ALCHEMY', 'MERCURYO'] },
         coin_family: config.STATIC_COIN_FAMILY.SOL
       },
-      // raw: true
     })
     if (tx.length > 0) {
       await Promise.all(tx.map(async (el: any) => {
@@ -36,11 +35,6 @@ class SolPendingWithdrawalProcess {
         return this.addTxToQueue(trnx); // Directly return the promise
       }));
     }
-    // if (tx.length > 0) {
-    //   for await (const el of tx) {
-    //     await this.addTxToQueue(el);
-    //   }
-    // }
   };
 
   public addTxToQueue = async (data: { tx_id: string; coin_id: number }) => {
