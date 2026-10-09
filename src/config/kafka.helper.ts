@@ -7,7 +7,6 @@ class KafkaHelper {
     private producer: any;
 
     constructor() {
-        // this.connect()
         // Do not connect here to avoid async issues
     }
 
@@ -42,7 +41,6 @@ class KafkaHelper {
                 messages: [{ value: JSON.stringify(messageData) }],
             });
 
-            // console.log(`✅ Message sent to topic "${topic}"`);
         } catch (error) {
             console.error('🔥 produceMessage error:', error);
         }

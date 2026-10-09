@@ -96,7 +96,6 @@ class Solana {
 					};
 					const response = await axios.post(nodeUrl, body, options);
 					if (response.status === 200) {
-						// console.log('response.data.result >>', response.data.result);
 						// JSON-RPC errors (e.g. -32015 unsupported tx version, -32009
 						// slot skipped) come back as HTTP 200 with no `result` - throw
 						// so callers see the real error and fall back to other nodes.

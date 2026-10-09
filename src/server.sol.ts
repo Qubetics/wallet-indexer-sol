@@ -10,7 +10,6 @@ import {
 import schedule from "node-schedule";
 class ETHStartProcess {
   constructor() {
-    // kafkaHelper.connect();
     this.read_block_process();
     this.readSpecificBlock();
     this.consume_read_block_queue();
@@ -20,8 +19,6 @@ class ETHStartProcess {
     this.updateTxStatusProcess();
     this.solUpdateBalance();
     this.connectKafka();
-    // this.solUpdateBalanceByWallet();
-    // this.testing_node()
   }
   public async connectKafka() {
     await kafkaHelper.connect();
@@ -31,11 +28,6 @@ class ETHStartProcess {
       await sol_blocks_process.readBlocks();
     });
   }
-  // public testing_node() {
-  //   schedule.scheduleJob("*/2 * * * * *", async function () {
-  //     await eth_blocks_process.testingNode();
-  //   });
-  // }
   public readSpecificBlock() {
     schedule.scheduleJob("*/1 * * * *", async function () {
       await sol_blocks_process.readSpecificBlock();

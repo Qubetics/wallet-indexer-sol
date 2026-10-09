@@ -117,9 +117,7 @@ class SolTxStatusUpdateProcess {
       } else if (txData.coin?.token_type == TokenStandard.SPL) {
         coin_data = await solProcessHelper.checkIfContract(txData.coin.token_address);
       }
-      //let coin_data: any = await CoinsModel.findOne({ attributes: ['is_token', 'token_type', 'coin_symbol', 'coin_family', 'cmc_id', 'coin_symbol', 'added_by'], where: { coin_id: txData.coin_id } });
 
-      // let coin_data: any = await solProcessHelper.CoinByCoinId(txData.coin_id);
       if (coin_data) {
         const trx_data = {
           coin_id: txData?.coin.coin_id,
@@ -146,7 +144,6 @@ class SolTxStatusUpdateProcess {
       }
 
 
-
     } catch (error: any) {
       console.error('sendTxUpdate error >>>>>>>', error);
       return false;
@@ -166,7 +163,6 @@ class SolTxStatusUpdateProcess {
       const to_address = txnData.to_adrs;
       const tx_type = txnData?.type
       const coin_symbol = trx_data?.coin?.coin_symbol
-      // let coin_family = txnData.coin_family;
 
       //Update transaction status
       const txUpdateRes = await TrnxHistoryModel.update({ blockchain_status: status_tx, tx_fee: trx_data.tx_fee, gas_reverted: trx_data.gas_reverted }, { where: { id: tx_row_id } })

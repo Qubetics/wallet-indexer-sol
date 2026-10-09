@@ -31,7 +31,6 @@ class sol_block_process {
             });
             if (lastBlockProcessed <= lastBlockToProcess) {
                 let blocks = await this.getBlocks(lastBlockProcessed, lastBlockToProcess);
-                // console.log('blocks 222>>>', blocks);
 
                 if (blocks && blocks?.length > 0) {
                     for await (let block of blocks) {
@@ -105,10 +104,6 @@ class sol_block_process {
                             return false;
                         });
                 });
-            // .catch((error) => {
-            //     console.log("🔥 ~ ~ getBlocks solWeb3.rpcCall error", error);
-            //     return false;
-            // });
         } catch (error: any) {
             console.log("🔥 ~ ~ getBlocks error", error);
             return false;
@@ -136,16 +131,7 @@ class sol_block_process {
                     SPECIFIC_BLOCK: specific_block,
                     // SET_LATEST_BLOCK: specific_block + 2,
                 });
-                // let blocks = await this.getBlocks(specific_block, specific_block + 2);
-                // if (blocks && blocks?.length > 0) {
-                //     for await (let block of blocks) {
                 await this.addTxToQueue(specific_block, `${this.sol_block_tx_topic}_a`);
-                //     }
-                // } else {
-                //     for (let i: any = specific_block; i <= specific_block + 2; i++) {
-                //         await this.addTxToQueue(i, `${this.sol_block_tx_topic}_a`);
-                //     }
-                // }
             }
 
             solProcessHelper.setKeyValuePair(
