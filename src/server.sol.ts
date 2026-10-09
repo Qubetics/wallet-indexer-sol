@@ -63,11 +63,6 @@ class ETHStartProcess {
       await sol_update_balance_controller.updateWalletConsumer();
     }, 10000);
   }
-  public async solUpdateBalanceByWallet() {
-    schedule.scheduleJob("*/2 * * * *", async function () {
-      await sol_update_balance_controller.updateWalletBalanceByWallet();
-    });
-  }
 }
 
 new ETHStartProcess();
