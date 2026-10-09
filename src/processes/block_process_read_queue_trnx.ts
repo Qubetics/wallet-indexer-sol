@@ -61,8 +61,6 @@ class queue_transactions {
         });
         await consumer.run({
             eachMessage: ({ topic, partition, message }: { topic: any; partition: any; message: any }) => {
-                // console.log('🚀 ~ ~ startBlockTransactionQueue topic', topic);
-                // console.log('🚀 ~ ~ startBlockTransactionQueue message.value', message.value.toString());
                 this.getTxFromBlock(JSON.parse(message.value.toString()));
             },
         });
@@ -71,7 +69,6 @@ class queue_transactions {
     public getTxFromBlock = async (blockId: number) => {
         try {
             let blockInfo = await this.getBlockTransactions(blockId);
-            // console.log('💥 ~ getTxFromBlock BLOCK NUMBER >>>', blockId);
             if (!blockInfo) {
                 console.log('blockInfo >>>', blockInfo)
                 console.log(`💥 ~ do not get the block info`, `Block Number`, blockId);
@@ -95,16 +92,12 @@ class queue_transactions {
                             continue;
                         }
 
-                        // if (dexExist?.length > 0 && (dexExist[0] !== 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4' && dexExist[0] !== 'JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB')) {
-                        //   continue;
-                        // }
 
                         let index = 0;
 
                         for await (let i of trnxData?.meta.postTokenBalances) {
                             if (trnxData?.meta?.postTokenBalances[index]?.mint !== undefined && trnxData?.meta?.postTokenBalances[index]?.owner == trnxData.transaction.message.accountKeys[0]) {
                                 let checkToken: any = await solProcessHelper.checkIfContract(trnxData?.meta?.postTokenBalances[index].mint);
-                                // console.log('checkToken >>>', checkToken);
                                 if (checkToken && Object.keys(checkToken)?.length > 0) {
                                     let getAmount: any = 0;
                                     const checkFilter: any = trnxData?.meta?.preTokenBalances?.find(
@@ -120,7 +113,6 @@ class queue_transactions {
                                     ) {
                                         getAmount = await this.sub(
                                             Number(trnxData?.meta?.postTokenBalances[index]?.uiTokenAmount?.uiAmountString),
-                                            // Number(trnxData?.meta?.preTokenBalances[index]?.uiTokenAmount?.uiAmountString)
                                             Number(checkFilter?.uiTokenAmount?.uiAmountString)
                                         );
                                     } else {
@@ -131,21 +123,17 @@ class queue_transactions {
                                     if (typeof getAmount == undefined) {
                                         getAmount = trnxData?.meta?.postTokenBalances[index]?.uiTokenAmount?.uiAmount;
                                     } else if (getAmount < 0 || isNaN(getAmount)) {
-                                        // getAmount = trnxData?.meta?.postTokenBalances[index]?.uiTokenAmount?.uiAmount
                                         getAmount = Math.abs(getAmount);
                                         is_withdraw = true;
                                     }
 
                                     let fromAddress: string = trnxData.transaction.message.accountKeys[0];
-                                    // let fromAddress1: string = trnxData.transaction.message.accountKeys[0];
                                     let toAddress: string = trnxData?.meta?.postTokenBalances[index].owner;
                                     if (dexExist?.length > 0) {
-                                        // fromAddress = trnxData?.meta?.postTokenBalances[index].programId;
                                         if (toAddress == fromAddress) {
                                             fromAddress = is_withdraw ? fromAddress : dexExist[0];
                                             toAddress = is_withdraw ? dexExist[0] : toAddress;
                                         } else {
-                                            // fromAddress = is_withdraw ? toAddress : dexExist[0];
                                             let fromAddress1 = fromAddress;
                                             if (is_withdraw) {
                                                 fromAddress = toAddress;
@@ -153,7 +141,6 @@ class queue_transactions {
                                             if (fromAddress1 == toAddress) {
                                                 toAddress = fromAddress1;
                                             }
-                                            // toAddress = is_withdraw ? fromAddress1 : toAddress;
                                         }
                                     } else {
                                         if (toAddress == fromAddress) {
@@ -161,12 +148,10 @@ class queue_transactions {
                                             toAddress = is_withdraw ? trnxData?.meta?.postTokenBalances[index].programId : toAddress;
                                         } else {
                                             fromAddress = is_withdraw ? toAddress : trnxData?.meta?.postTokenBalances[index].programId;
-                                            // toAddress = is_withdraw ? fromAddress1 : toAddress;
                                         }
                                     }
                                     txData = {
                                         txId: trnxData.transaction.signatures[0],
-                                        // fromAddress: trnxData.transaction.message.accountKeys[0],
                                         fromAddress: fromAddress,
                                         toAddress: toAddress,
                                         token: checkToken,
@@ -199,7 +184,6 @@ class queue_transactions {
                                         }
 
                                         if (ourTrnx) {
-                                            // console.log('🚀 🖐️ ~ ~ ourTrnx TOKEN', ourTrnx);
                                             await this.addTxToQueue(
                                                 ourTrnx,
                                                 this.deposit_withdraw_topic || ''
@@ -243,7 +227,6 @@ class queue_transactions {
                             }
 
                             if (ourTrnx) {
-                                // console.log('🚀 🖐️ ~ ~ ourTrnx NATIVE TOKEN', ourTrnx);
                                 await this.addTxToQueue(
                                     ourTrnx,
                                     this.deposit_withdraw_topic || ''
@@ -287,9 +270,6 @@ class queue_transactions {
     public async addTxToQueue(data: TxType, queueName: string) {
         try {
             await kafkaHelper.produceMessage(queueName, data)
-            //rabbitMq.send_tx_to_queue(queueName, Buffer.from(JSON.stringify(data)))
-            // await rabbitMq.assertQueue(queueName);
-            // await rabbitMq.sendToQueue(queueName, Buffer.from(JSON.stringify(data)));
         } catch (err: any) {
             console.error("addTxToQueue", (err as Error).message);
             await global_helper.save_error_logs('Sol_checkAddressInDB', err.message)

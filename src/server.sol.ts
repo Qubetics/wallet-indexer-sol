@@ -9,18 +9,12 @@ class ETHStartProcess {
     this.getPendingWithdrawalTxProcess();
     this.updateTxStatusProcess();
     this.SolUpdateBalance();
-    // this.testing_node()
   }
   public read_block_process() {
     schedule.scheduleJob("*/5 * * * * *", async function () {
       await sol_blocks_process.readBlocks();
     });
   }
-  // public testing_node() {
-  //   schedule.scheduleJob("*/2 * * * * *", async function () {
-  //     await eth_blocks_process.testingNode();
-  //   });
-  // }
   public readSpecificBlock() {
     schedule.scheduleJob('*/1 * * * *', async function () {
       await sol_blocks_process.readSpecificBlock();

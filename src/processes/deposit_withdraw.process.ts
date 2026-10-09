@@ -1,6 +1,5 @@
 import { TxType, WebHookTxType } from "../types/ERC20Tokens.types";
 import { CoinInterface, NotificationInterface, TrnxHistoryModel } from "../models";
-// import rabbitMq from "../config/rabbitMq";
 import { config } from "../config/config";
 import { BlockChainStatusEnum, CoinFamilyEnum, NotificationTypeEnum, TrnxTypeEnum, TxReqTypesEnum } from "../enum";
 import { Utility_Helper, Wallet_Helper } from "../helpers"
@@ -172,31 +171,9 @@ class SolDepositWithdrawProcess {
       }
       const newTrnx: any = await TrnxHistoryModel.create(trx_data);
 
-      // let coinFmlyTag: string = "";
-      // if (coin.is_token == BooleanEnum.true) {
-      //   coinFmlyTag = `(${coin.token_type.toUpperCase()})`;
-      // }
-
-
 
       if (Addressdeposit) {
         let trnxTypeD: string = "Deposit";
-        // switch (tx_type) {
-        //   // case TrnxTypeEnum.SMARTCONTRACTINTERACTION:
-        //   //   trnxTypeD = "Smart Contract Interaction";
-        //   //   break;
-        //   // case TrnxTypeEnum.APPROVE:
-        //   //   trnxTypeD = "Approval";
-        //   //   break;
-        //   case TrnxTypeEnum.SWAP:
-        //     trnxTypeD = "Swap";
-        //     break;
-        //   case TrnxTypeEnum.CROSS_CHAIN:
-        //     trnxTypeD = "Cross-chain Swap";
-        //     break;
-        //   default:
-        //     break;
-        // }
         /** update to adrs wallet balance */
         let balance: any = await Wallet_Helper.Update_Balance(
           to_address, /// wallet_address,
@@ -227,7 +204,6 @@ class SolDepositWithdrawProcess {
 
       if (AddressWithdraw) {
         let trnxTypeW: string = "Withdraw";
-        // let notificationTypeW: NotificationTypeEnum = NotificationTypeEnum.WITHDRAW;
 
         switch (tx_type) {
           case TrnxTypeEnum.SMARTCONTRACTINTERACTION:

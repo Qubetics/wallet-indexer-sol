@@ -1,28 +1,19 @@
 import zookeeperConfig from "../helpers/zookeeper.helper";
 const name = 'qubetics';
 export const config = {
-  // API_URL: zookeeperConfig.config.API_URL,
-  // NETWORK: zookeeperConfig.config.NETWORK,
   DB_USER: zookeeperConfig.config.DB_USER,
   DB_HOST_READ: zookeeperConfig.config.DB_HOST_READ,
   DB_HOST_WRITE: zookeeperConfig.config.DB_HOST_WRITE,
   DB_NAME: zookeeperConfig.config.DB_NAME,
   DB_PASSWORD: zookeeperConfig.config.DB_PASSWORD,
   DB_PORT: zookeeperConfig.config.DB_PORT,
-  // DEPOSIT_WITHDRAW_PROCESS_ETH: zookeeperConfig.config.DEPOSIT_WITHDRAW_PROCESS_ETH,
   SOL_WALLET_ADDRESS: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.SOL_WALLET_ADDRESS}`,
-  // WITHDRAW_QUEUE_BLOCKS_PROCESS: zookeeperConfig.config.WITHDRAW_QUEUE_BLOCKS_PROCESS,
   REDIS_CONN: zookeeperConfig.config.REDIS_CONN,
   KAFKA_BROKER: zookeeperConfig.config.KAFKA_BROKER,
   KAFKA_CLIENT_ID: zookeeperConfig.config.KAFKA_CLIENT_ID,
   MIN_BLOCK_CONFORMATIONS: zookeeperConfig.config.MIN_BLOCK_CONFIRMATIONS_SOL,
   TOKEN_TYPE_SOL: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.TOKEN_TYPE_SOL}`,
-  //TOKEN_TYPE721_ETH: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.TOKEN_TYPE721_ETH}`,
   STATIC_COIN_FAMILY: zookeeperConfig.config.STATIC_COIN_FAMILY,
-  // added new
-  // KEYS: {
-  //   FCM_PUSH: zookeeperConfig.config.FCM_PUSH
-  // },
   REDISKEYS: {
     LAST_BLOCK_NUMBER: `${name}_${zookeeperConfig.config.SERVER}_${zookeeperConfig.config.LAST_BLOCK_NUMBER_SOL}`,
     ALL_PROCESSES: zookeeperConfig.config.ALL_PROCESSES,
@@ -50,12 +41,6 @@ export const config = {
   /**
    * KAFKA KEYS END
    */
-  // MAILGUN: {
-  //   MAILGUN_API_KEY: zookeeperConfig.config.MAILGUN_API_KEY,
-  //   MAILGUN_DOMAIN: zookeeperConfig.config.MAILGUN_DOMAIN,
-  //   MAILGUN_BASE_URL: zookeeperConfig.config.MAILGUN_BASE_URL,
-  //   FROM_GMAIL: zookeeperConfig.config.FROM_GMAIL
-  // },
   NODE: {
     SOL_RPC_URL: zookeeperConfig.config.SOL_RPC_URL
   },

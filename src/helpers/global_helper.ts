@@ -1,7 +1,6 @@
 import axios from "axios";
 import { config } from "../config/config";
 import { CatchErrorMsgsModel, CoinInterface } from "../models";
-// import WalletModel from "../models/tables/model.wallets";
 import { WalletModel, CustomTokenModel } from "../models/tables/index"
 import solProcessHelper from "../processes/process.helper";
 
@@ -18,10 +17,8 @@ class Global_helper {
             })
             if (!wallet_data) {
                 wallet_data = await solProcessHelper.check_our_wallet_address(wallet_address);
-                // console.log('wallet_data >>>', wallet_data);
                 let data_obj: any = {
                     user_id: wallet_data.user_id,
-                    // email: wallet_data.email,
                     wallet_name: wallet_data.wallet_name,
                     wallet_address: wallet_address,
                     coin_id: coin.coin_id,
@@ -69,30 +66,6 @@ class Global_helper {
         }
 
     }
-    // public async send_mail(email: string, text: string, subject: string) {
-    //     try {
-    //         const MAILGUN_API_KEY: string = `${config.MAILGUN.MAILGUN_API_KEY}`;
-    //         const MAILGUN_DOMAIN: string = `${config.MAILGUN.MAILGUN_DOMAIN}`;
-    //         const MAILGUN_BASE_URL: string = `${config.MAILGUN.MAILGUN_BASE_URL}${MAILGUN_DOMAIN}`;
-    //         const response: any = await axios({
-    //             method: 'post',
-    //             url: `${MAILGUN_BASE_URL}/messages`,
-    //             auth: {
-    //                 username: 'api',
-    //                 password: MAILGUN_API_KEY
-    //             },
-    //             params: {
-    //                 from: config.MAILGUN.FROM_GMAIL,
-    //                 to: email,
-    //                 subject: subject,
-    //                 html: text
-    //             }
-    //         });
-    //     } catch (err: any) {
-    //         console.error("send_mail", err)
-    //         await this.save_error_logs("MAILGUN_ERROR", err.message)
-    //     }
-    // }
     public async save_error_logs(fn_name: string, error_message: any) {
         try {
             let value_exist: any = await solProcessHelper.getKeyValuePair(config.REDISKEYS.ALL_PROCESSES, config.REDISKEYS.SOL_ERROR_LOGS)
