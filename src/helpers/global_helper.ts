@@ -1,4 +1,3 @@
-import axios from "axios";
 import { config } from "../config/config";
 import { CatchErrorMsgsModel, CoinInterface } from "../models";
 import { WalletModel, CustomTokenModel } from "../models/tables/index"
