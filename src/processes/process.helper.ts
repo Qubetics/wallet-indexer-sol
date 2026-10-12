@@ -4,7 +4,6 @@ import { CoinInterface, CoinsModel, WalletInterface } from "../models";
 import redisClient from "../config/redis";
 import { promisify } from "util";
 import { config } from "../config/config";
-import { BooleanEnum, CoinFamilyEnum } from "../enum";
 import { global_helper } from "../helpers/global_helper";
 import { Op } from "sequelize";
 
