@@ -6,9 +6,7 @@ export enum BooleanEnum {
 
 
 export enum TxReqTypesEnum {
-    APP = 'APP',
     EXNG = 'EXNG',
-    NOTPRESET = 'NOT_PRESENT'
   }
 
 
