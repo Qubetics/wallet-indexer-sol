@@ -2,7 +2,6 @@ import database from "../config/db";
 import { QueryTypes } from "sequelize";
 import { CoinInterface, CoinsModel, WalletInterface } from "../models";
 import redisClient from "../config/redis";
-import { promisify } from "util";
 import { config } from "../config/config";
 import { global_helper } from "../helpers/global_helper";
 import { Op } from "sequelize";
@@ -17,8 +16,7 @@ class SolProcessHelper {
   }
   public async getKeyValuePair(keyName: string, field: string) {
     try {
-      const getAsync = promisify(redisClient.HGET).bind(redisClient);
-      const value = await getAsync(keyName, field.toUpperCase() || "");
+      const value = await redisClient.hGet(keyName, field.toUpperCase() || "");
       return value;
     } catch (err: any) {
       console.error('getKeyValuePair >>>>', err);
@@ -29,12 +27,7 @@ class SolProcessHelper {
   public async getMultipleKeyValuePairs(keyName: string, fields: string[]) {
     try {
       const upperFields = fields.map(f => f.toUpperCase());
-      return new Promise((resolve, reject) => {
-        redisClient.hmget(keyName, ...upperFields, (err, results) => {
-          if (err) reject(err);
-          else resolve(results);
-        });
-      });
+      return await redisClient.hmGet(keyName, upperFields);
     } catch (err: any) {
       console.error('getMultipleKeyValuePairs >>>>', err);
       return null;
@@ -44,7 +37,7 @@ class SolProcessHelper {
   public updateLastBlockProcessed = async (lastBlockProcessed: number) => {
     try {
       const updatedBlockNumber = ++lastBlockProcessed;
-      redisClient.set(
+      await redisClient.set(
         config.REDISKEYS.LAST_BLOCK_NUMBER || '',
         updatedBlockNumber.toString()
       );
@@ -55,16 +48,15 @@ class SolProcessHelper {
 
   public getLastBlockProcessed = async (blockNumber: number) => {
     try {
-      const getAsync = promisify(redisClient.get).bind(redisClient);
-      console.log('config.REDISKEYS.LAST_BLOCK_NUMBER >>>', config.REDISKEYS.LAST_BLOCK_NUMBER);
-      const value: any = await getAsync(config.REDISKEYS.LAST_BLOCK_NUMBER || '');
+            console.log('config.REDISKEYS.LAST_BLOCK_NUMBER >>>', config.REDISKEYS.LAST_BLOCK_NUMBER);
+      const value: any = await redisClient.get(config.REDISKEYS.LAST_BLOCK_NUMBER || '');
       console.log('value >>>', value);
       if (!isNaN(value) && value) { // Check if value is NOT NaN
         return parseInt(value);
       } else {
         console.log('value222 >>>', value);
 
-        redisClient.set(
+        await redisClient.set(
           config.REDISKEYS.LAST_BLOCK_NUMBER || '',
           blockNumber.toString()
         );
@@ -76,7 +68,7 @@ class SolProcessHelper {
 
   public async setKeyValuePair(keyName: string, field: string, value: string) {
     try {
-      redisClient.hset(keyName, field.toUpperCase(), value);
+      await redisClient.hSet(keyName, field.toUpperCase(), value);
     } catch (err: any) {
       console.error('setKeyValuePair >>>', err);
     }
