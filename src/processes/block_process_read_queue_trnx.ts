@@ -316,7 +316,7 @@ class queue_transactions {
                                                 receiver.post - receiver.pre
                                             );
 
-                                    if (amount <= 0) continue;
+                                    if (!(amount > 0)) continue;
                                     const txData: TxType = {
                                         txId: signature,
                                         fromAddress: sender.owner,
